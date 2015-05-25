@@ -1,12 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof(NetworkView))]
 public class ServerManager : MonoBehaviour {
 	public string gameName = "Cooking_Foxes";
+
+	private NetworkView nv;
 
 
 	// Use this for initialization
 	void Start () {
+		nv = GetComponent<NetworkView> ();
 		Debug.Log ("Starting server");
 		startServer ();
 	}
@@ -30,5 +34,16 @@ public class ServerManager : MonoBehaviour {
 		Network.incomingPassword = "foxesinboxes";
 		bool useNat = !Network.HavePublicAddress ();
 		Network.InitializeServer (10, 25000, useNat);
+	}
+
+	[RPC]
+	void InstantiateWorld () {
+		Debug.Log ("Sent instantiation command to player");
+	}
+
+	void OnPlayerConnected (NetworkPlayer player)
+	{
+		Debug.Log ("Connected player " + player.ToString());
+		nv.RPC ("InstantiateWorld", RPCMode.Others);
 	}
 }
