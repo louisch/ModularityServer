@@ -18,7 +18,13 @@ public class ServerManager : MonoBehaviour {
 	private NetworkView nv;
 
 	// default player object
-	public Transform player;
+	public GameObject playerModel;
+	private List<PlayerManager> playerTracker = new List<PlayerManager> ();
+	private List<NetworkPlayer> scheduledSpawns = new List<NetworkPlayer> ();
+
+	enum NetworkGroup {DEFAULT = 0, PLAYER = 1, SERVER = 2};
+
+	private bool processSpawnRequests = false;
 
 	// Server initialisation code
 	void Start () {
@@ -50,27 +56,81 @@ public class ServerManager : MonoBehaviour {
 		}
 	}
 
+
 	// Response to new player connection
 	void OnPlayerConnected (NetworkPlayer player)
 	{
-		Debug.Log ("Connected player " + player.ToString());
-		NetworkViewID viewID = Network.AllocateViewID();
-		GetComponent<NetworkView> ().RPC ("SpawnPlayer",
-											RPCMode.AllBuffered,
-											player, viewID);
-	}
-
-	void OnPlayerDisconnected (NetworkPlayer player)
-	{
-		Debug.Log ("Player " + player.ToString () + " disonnected.");
-		Network.RemoveRPCs(player);
-		Network.DestroyPlayerObjects(player);
+		Debug.Log ("Connected player " + player.guid);
+		scheduledSpawns.Add (player);
+		processSpawnRequests = true;
 	}
 
 	[RPC]
-	void SpawnPlayer (NetworkPlayer player, NetworkViewID viewID)
+	// players must request spawn
+	void RequestSpawn (NetworkPlayer requestee)
 	{
-		Transform playerShip = Instantiate (this.player, new Vector3(0,0,0), Quaternion.identity) as Transform;
-		playerShip.GetComponent<NetworkView>().viewID = viewID;
+		if (!processSpawnRequests)
+		{
+			Debug.Log ("Invalid spawn request: not currently spawning.");
+			return;
+		}
+		foreach (NetworkPlayer spawn in scheduledSpawns)
+		{
+			Debug.Log ("Checking spawn " + spawn.guid);
+			if (spawn == requestee)
+			{
+				Debug.Log ("Found requestee in pending spawns list");
+				GameObject handle = Instantiate (playerModel) as GameObject;
+				PlayerManager man = handle.GetComponent<PlayerManager> ();
+				if (!man)
+				{
+					Debug.LogError ("This player has no PlayerManager!");
+					return;
+				}
+				man.SetOwner (requestee);
+				nv.RPC ("SpawnPlayer",
+									RPCMode.Others,
+									requestee,
+									man.GetViewID ());
+				playerTracker.Add (man);
+				break;
+			}
+		}
+
+		scheduledSpawns.Remove (requestee);
+		if (scheduledSpawns.Count == 0)
+		{
+			Debug.Log ("Done spawning!");
+			processSpawnRequests = false;
+		}
+	}
+
+	[RPC]
+	void SpawnPlayer (NetworkPlayer p, NetworkViewID v)
+	{
+		Debug.Log ("Spawning player " + p.guid + " in clients.");
+	}
+
+	[RPC]
+	void DespawnPlayer (NetworkPlayer p)
+	{
+		Debug.Log ("Despawning player " + p.guid + " in clients.");
+	}
+
+	// response to player disconnected
+	void OnPlayerDisconnected (NetworkPlayer player)
+	{
+		Debug.Log ("Player " + player.ToString () + " disonnected.");
+		foreach (PlayerManager p in playerTracker)
+		{
+			if (p.GetOwner () == player)
+			{
+				//Network.RemoveRPCs (player);
+				//Network.RemoveRPCs (p.GetViewID ());
+
+				nv.RPC ("DespawnPlayer", RPCMode.Others, player);
+				Destroy (p.gameObject);
+			}
+		}
 	}
 }
