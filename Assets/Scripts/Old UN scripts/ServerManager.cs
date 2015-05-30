@@ -126,7 +126,7 @@ public class ServerManager : MonoBehaviour {
 			if (p.GetOwner () == player)
 			{
 				//Network.RemoveRPCs (player);
-				//Network.RemoveRPCs (p.GetViewID ());
+				Network.RemoveRPCs (p.GetViewID ());
 
 				nv.RPC ("DespawnPlayer", RPCMode.Others, player);
 				Destroy (p.gameObject);
