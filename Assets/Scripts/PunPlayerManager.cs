@@ -14,6 +14,10 @@ public class PunPlayerManager : MonoBehaviour {
 		{
 			return View.viewID;
 		}
+		set
+		{
+			View.viewID = value;
+		}
 	}
 
 	// move variables
@@ -23,6 +27,7 @@ public class PunPlayerManager : MonoBehaviour {
 
 	float hInput;
 	float vInput;
+	bool update = false;
 	
 	// object position info
 	Rigidbody rb;
@@ -38,38 +43,35 @@ public class PunPlayerManager : MonoBehaviour {
 
 	void FixedUpdate ()
 	{
-		// normalise input vecor
 		Vector3 moveBy = new Vector3 (hInput,0,vInput).normalized;
-		// compute movement delta vector (frame independent)
 		moveBy = new Vector3(moveBy.x * hSpeed * Time.fixedDeltaTime, 0, moveBy.z * vSpeed * Time.fixedDeltaTime);
 		rb.MovePosition(trans.position + moveBy);
+		update = moveBy != Vector3.zero;
 	}
 
 	// client call to update input data
 	[RPC]
 	public void UpdateInput (float h, float v)
 	{
-		this.hInput = h;
-		this.vInput = v;
+		hInput = h;
+		vInput = v;
 	}
 
 	// determines which information is transferred on object update
-	void OnPhotonSerializeNetworkView (BitStream stream, NetworkMessageInfo info)
+	void OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
 	{
-		Debug.Log ("Serialising is happening");
-
-		if (stream.isWriting)
+		if (update && stream.isWriting)
 		{
 			Debug.Log ("Serialising position information");
 			Vector3 pos = trans.position;
 			Quaternion rot = trans.rotation;
-			stream.Serialize(ref pos);//, maxDelta);
-			stream.Serialize(ref rot);//, maxDelta);
+			stream.Serialize(ref pos);
+			stream.Serialize(ref rot);
 		}
-		else
+		else if (!stream.isWriting)
 		{
 			// server should not be recieving information
-			Debug.LogError ("Server object is recieving position data from client!");
+			Debug.LogError ("Server object is recieving position data from client");
 		}
 	}
 }

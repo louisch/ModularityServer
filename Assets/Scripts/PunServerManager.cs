@@ -53,12 +53,13 @@ public class PunServerManager : MonoBehaviour {
 		{
 			if (player.Owner == disonnected)
 			{
+				found = player;
 				PhotonNetwork.RemoveRPCs (disonnected);
 				PhotonNetwork.RemoveRPCs (player.View);
 
 				View.RPC ("DespawnPlayer", PhotonTargets.Others, disonnected);
 				Destroy (player.gameObject);
-				found = player;
+				PhotonNetwork.UnAllocateViewID (player.ViewID);
 			}
 		}
 
@@ -89,9 +90,11 @@ public class PunServerManager : MonoBehaviour {
 					Debug.LogError ("Spawned player lacks a player manager");
 					return;
 				}
-				Debug.Log ("Sending rpc spawn to client");
+				int viewID = PhotonNetwork.AllocateViewID ();
 				man.Owner = info.sender;
-				View.RPC ("SpawnPlayer", PhotonTargets.Others, info.sender, man.ViewID);
+				man.ViewID = viewID;
+				Debug.LogFormat ("Sending rpc spawn with id {0}", viewID);
+				View.RPC ("SpawnPlayer", PhotonTargets.Others, info.sender, viewID);
 				playersInGame.Add (man);
 				break;
 			}
