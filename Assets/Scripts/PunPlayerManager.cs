@@ -23,7 +23,6 @@ public class PunPlayerManager : MonoBehaviour {
 	// move variables
 	public float hSpeed = 10;
 	public float vSpeed = 10;
-	public float maxDelta = 0.001F; // precision for serialized floating point values
 
 	float hInput;
 	float vInput;
@@ -63,10 +62,12 @@ public class PunPlayerManager : MonoBehaviour {
 		if (update && stream.isWriting)
 		{
 			Debug.Log ("Serialising position information");
-			Vector3 pos = trans.position;
+			Vector3 pos = rb.position;
+			Vector3 velocity = rb.velocity;
 			Quaternion rot = trans.rotation;
+
 			stream.Serialize(ref pos);
-			stream.Serialize(ref rot);
+			stream.Serialize(ref velocity);
 		}
 		else if (!stream.isWriting)
 		{
