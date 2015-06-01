@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-// controls players on the server
+/**
+* This script is for keeping track of players on the server.
+* It receives and applies input updates from client players
+* and broadcasts position updates to all clients.
+*/
 [RequireComponent(typeof(PhotonView))]
 [RequireComponent(typeof(Rigidbody2D))]
 public class PunPlayerManager : MonoBehaviour {
-	// network info
+	// Object connection info
 	public PhotonPlayer Owner {get; set;}
 	public PhotonView View {get; private set;}
 	public int ViewID
@@ -20,22 +24,23 @@ public class PunPlayerManager : MonoBehaviour {
 		}
 	}
 
-	// move variables
+	// Movement modifiers
 	public float strafeModifier = 100;
 	public float thrustModifier = 100;
 	public float torqueModifier = 5;
-
+	// Movement input from latest client update
 	float strafe;
 	float thrust;
 	float torque;
-
+	// Fields used to determine whether the state of an object changed since the previous call to FixedUpdate
 	Vector2 previousPosition;
 	float previousRotation;
 	bool update = false;
 	
-	// object position info
+	// Reference to object's rigid body
 	Rigidbody2D rb;
 
+	// Runs setup on newly created player object
 	void Awake ()
 	{
 		Debug.Log ("Player created");
@@ -52,7 +57,8 @@ public class PunPlayerManager : MonoBehaviour {
 
 		// apply input to movement
 		Vector2 moveForce = new Vector2 (strafe,thrust).normalized;
-		moveForce = new Vector2(moveForce.x * strafeModifier * Time.fixedDeltaTime, moveForce.y * thrustModifier * Time.fixedDeltaTime);
+		moveForce = new Vector2(moveForce.x * strafeModifier * Time.fixedDeltaTime,
+								moveForce.y * thrustModifier * Time.fixedDeltaTime);
 		rb.AddForce (moveForce);
 		rb.AddTorque (torque * torqueModifier * Time.fixedDeltaTime);
 	}
