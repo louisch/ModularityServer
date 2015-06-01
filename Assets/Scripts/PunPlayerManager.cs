@@ -21,11 +21,16 @@ public class PunPlayerManager : MonoBehaviour {
 	}
 
 	// move variables
-	public float hSpeed = 10;
-	public float vSpeed = 10;
+	public float strafeModifier = 100;
+	public float thrustModifier = 100;
+	public float torqueModifier = 5;
 
-	float hInput;
-	float vInput;
+	float strafe;
+	float thrust;
+	float torque;
+
+	Vector2 previousPosition;
+	float previousRotation;
 	bool update = false;
 	
 	// object position info
@@ -36,22 +41,41 @@ public class PunPlayerManager : MonoBehaviour {
 		Debug.Log ("Player created");
 		rb = GetComponent<Rigidbody2D> ();
 		View = GetComponent<PhotonView> ();
+		previousRotation = rb.rotation;
+		previousPosition = rb.position;
 	}
 
 	void FixedUpdate ()
 	{
-		Vector2 moveBy = new Vector2 (hInput,vInput).normalized;
-		moveBy = new Vector2(moveBy.x * hSpeed * Time.fixedDeltaTime, moveBy.y * vSpeed * Time.fixedDeltaTime);
-		rb.MovePosition(rb.position + moveBy);
-		update = moveBy != Vector2.zero;
+		// check if rb changed since last FixedUpdate
+		CheckChanges ();
+
+		// apply input to movement
+		Vector2 moveForce = new Vector2 (strafe,thrust).normalized;
+		moveForce = new Vector2(moveForce.x * strafeModifier * Time.fixedDeltaTime, moveForce.y * thrustModifier * Time.fixedDeltaTime);
+		rb.AddForce (moveForce);
+		rb.AddTorque (torque * torqueModifier * Time.fixedDeltaTime);
+	}
+
+	// checks if rb changed since last call and updates rb info cache
+	void CheckChanges ()
+	{
+		// sets update only if position or rotation has changed
+		update = previousPosition != rb.position || previousRotation != rb.rotation;
+
+		// update movement cache
+		previousPosition = rb.position;
+		previousRotation = rb.rotation;
+
 	}
 
 	// client call to update input data
 	[RPC]
-	public void UpdateInput (float h, float v)
+	public void UpdateInput (float strafe, float thrust, float torque)
 	{
-		hInput = h;
-		vInput = v;
+		this.strafe = strafe;
+		this.thrust = thrust;
+		this.torque = torque;
 	}
 
 	// determines which information is transferred on object update
@@ -66,6 +90,7 @@ public class PunPlayerManager : MonoBehaviour {
 
 			stream.Serialize(ref pos);
 			stream.Serialize(ref velocity);
+			stream.Serialize(ref rotation);
 		}
 		else if (!stream.isWriting)
 		{
