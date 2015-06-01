@@ -71,8 +71,15 @@ public class PunPlayerManager : MonoBehaviour {
 
 	// client call to update input data
 	[RPC]
-	public void UpdateInput (float strafe, float thrust, float torque)
+	public void UpdateInput (float strafe, float thrust, float torque, PhotonMessageInfo info)
 	{
+		if (info.sender != Owner)
+		{
+			Debug.LogWarningFormat ("Illegal move: player {0} attempted to move player {1}",
+									info.sender.ToString (),
+									Owner.ToString ());
+			return;
+		}
 		this.strafe = strafe;
 		this.thrust = thrust;
 		this.torque = torque;
