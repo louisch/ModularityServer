@@ -40,7 +40,10 @@ public class PunPlayerManager : MonoBehaviour {
 	// Reference to object's rigid body
 	Rigidbody2D rb;
 
-	// Runs setup on newly created player object
+	/**
+	* Runs setup on newly created player object.
+	* (self-documenting)
+	*/
 	void Awake ()
 	{
 		Debug.Log ("Player created");
@@ -50,38 +53,49 @@ public class PunPlayerManager : MonoBehaviour {
 		previousPosition = rb.position;
 	}
 
+	/**
+	* Every update, computes movement based on the client's input and applies it.
+	* Additionally, checks if the object moved since previous call.
+	*/
 	void FixedUpdate ()
 	{
-		// check if rb changed since last FixedUpdate
 		CheckChanges ();
-
-		// apply input to movement
+		// Compute movement from saved input
 		Vector2 moveForce = new Vector2 (strafe,thrust).normalized;
 		moveForce = new Vector2(moveForce.x * strafeModifier * Time.fixedDeltaTime,
 								moveForce.y * thrustModifier * Time.fixedDeltaTime);
+		// Apply movement to the object
 		rb.AddForce (moveForce);
 		rb.AddTorque (torque * torqueModifier * Time.fixedDeltaTime);
 	}
 
-	// checks if rb changed since last call and updates rb info cache
+	/**
+	* Checks if object's state has changed since last call.
+	* Updates the state tracking fields if it has.
+	*/
 	void CheckChanges ()
 	{
 		// sets update only if position or rotation has changed
 		update = previousPosition != rb.position || previousRotation != rb.rotation;
-
-		// update movement cache
-		previousPosition = rb.position;
-		previousRotation = rb.rotation;
+		if (update)
+		{
+			// update state fields
+			previousPosition = rb.position;
+			previousRotation = rb.rotation;
+		}
 
 	}
 
-	// client call to update input data
+	/**
+	* RPC called by clients to update the object's input info.
+	* Only the client that owns the object is allowed to update its input info.
+	*/
 	[RPC]
 	public void UpdateInput (float strafe, float thrust, float torque, PhotonMessageInfo info)
 	{
 		if (info.sender != Owner)
 		{
-			Debug.LogWarningFormat ("Illegal move: player {0} attempted to move player {1}",
+			Debug.LogWarningFormat ("Illegal UpdateInput attempt: player {0} attempted to move player {1}",
 									info.sender.ToString (),
 									Owner.ToString ());
 			return;
@@ -91,12 +105,14 @@ public class PunPlayerManager : MonoBehaviour {
 		this.torque = torque;
 	}
 
-	// determines which information is transferred on object update
+	/**
+	* Serialises state changes for client.
+	* Currently, the whole state is sent, even if only part of the state changed.
+	*/
 	void OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (update && stream.isWriting)
 		{
-			Debug.Log ("Serialising position information");
 			Vector2 pos = rb.position;
 			Vector2 velocity = rb.velocity;
 			float rotation = rb.rotation;
@@ -107,8 +123,7 @@ public class PunPlayerManager : MonoBehaviour {
 		}
 		else if (!stream.isWriting)
 		{
-			// server should not be recieving information
-			Debug.LogError ("Server object is recieving position data from client");
+			Debug.LogError ("Server object is receiving positional info from client");
 		}
 	}
 }

@@ -2,26 +2,38 @@
 using System.Collections;
 using System.Collections.Generic;
 
+/**
+* This script provides functions for setting up the server and managing player connection,
+* as well as setting up the game.
+*/
 [RequireComponent(typeof(PhotonView))]
 public class PunServerManager : MonoBehaviour {
+	/* Game/server/room information */
 	public string gameVersion = "v0.1dev";
 	public string roomName = "The Room";
 	bool connected = false;
 	bool roomOn = false;
 
-	// client net controller netview
+	/* Server's photon view controller */
 	PhotonView View {get; set;}
 
-	// buttons
+	/* Manual button setup (provisional) */
 	public float mod = 0.1f;
 	float btnX, btnY, btnW, btnH;
 
-	// player spawn control
+	/* Player management */
+	// Keeps track of connected, but unspawned players
 	ICollection<PhotonPlayer> spawnRequests = new List<PhotonPlayer> ();
+	// Keeps track of spawned players
 	ICollection<PunPlayerManager> playersInGame = new List<PunPlayerManager> ();
+	// default player object prefab
 	public GameObject playerModel;
+	// true if server is currently accepting spawn requests
 	bool playersSpawning = false;
 
+	/**
+	* Self-documenting setup method.
+	*/
 	void Start ()
 	{
 		btnX = Screen.width * mod;
@@ -32,19 +44,31 @@ public class PunServerManager : MonoBehaviour {
 		View = GetComponent<PhotonView> ();
 	}
 
+	/**
+	* Called when the server establishes a connection with the photon cloud.
+	* Supposedly. It actually doesn't work. Sike!
+	*/
 	void OnConnectedToMaster ()
 	{
 		Debug.Log ("Creating room");
 		PhotonNetwork.CreateRoom (roomName);
 	}
 
+	/**
+	* Adds newly connected players to the unspawned player list.
+	* Enables spawning (unsafe-ish)
+	*/
 	void OnPhotonPlayerConnected (PhotonPlayer player)
 	{
-		Debug.Log ("Adding player to spawn list");
+		Debug.LogFormat ("Adding player {0} to spawn list", player.ToString ());
 		spawnRequests.Add (player);
 		playersSpawning = true;
 	}
 
+	/**
+	* Despawns disconnected players locally.
+	* PUN calls this method automatically on other clients.
+	*/
 	void OnPhotonPlayerDisconnected (PhotonPlayer disconnected)
 	{
 		Debug.Log ("Player " + disconnected.ToString () + " disconnected.");
@@ -68,6 +92,11 @@ public class PunServerManager : MonoBehaviour {
 		}
 	}
 
+	/**
+	* Client-side call to request the spawning of their player.
+	* Checks if the player is waiting to be spawned. If found, spawns local player object
+	* and causes the clients to also spawn a new player object with the same ViewID.
+	*/
 	[RPC]
 	void RequestSpawn (PhotonMessageInfo info)
 	{
@@ -107,6 +136,9 @@ public class PunServerManager : MonoBehaviour {
 		}
 	}
 
+	/**
+	* Button and connection setup. Should be replaced with proper UI elements when applicable.
+	*/
 	void OnGUI ()
 	{
         if(!connected && GUI.Button(new Rect(btnX, btnY, btnW, btnH), "Connect to cloud server"))
