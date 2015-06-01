@@ -3,7 +3,7 @@ using System.Collections;
 
 // controls players on the server
 [RequireComponent(typeof(PhotonView))]
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class PunPlayerManager : MonoBehaviour {
 	// network info
 	public PhotonPlayer Owner {get; set;}
@@ -29,23 +29,21 @@ public class PunPlayerManager : MonoBehaviour {
 	bool update = false;
 	
 	// object position info
-	Rigidbody rb;
-	Transform trans;
+	Rigidbody2D rb;
 
 	void Awake ()
 	{
 		Debug.Log ("Player created");
-		rb = GetComponent<Rigidbody> ();
+		rb = GetComponent<Rigidbody2D> ();
 		View = GetComponent<PhotonView> ();
-		trans = GetComponent<Transform> ();
 	}
 
 	void FixedUpdate ()
 	{
-		Vector3 moveBy = new Vector3 (hInput,0,vInput).normalized;
-		moveBy = new Vector3(moveBy.x * hSpeed * Time.fixedDeltaTime, 0, moveBy.z * vSpeed * Time.fixedDeltaTime);
-		rb.MovePosition(trans.position + moveBy);
-		update = moveBy != Vector3.zero;
+		Vector2 moveBy = new Vector2 (hInput,vInput).normalized;
+		moveBy = new Vector2(moveBy.x * hSpeed * Time.fixedDeltaTime, moveBy.y * vSpeed * Time.fixedDeltaTime);
+		rb.MovePosition(rb.position + moveBy);
+		update = moveBy != Vector2.zero;
 	}
 
 	// client call to update input data
@@ -62,9 +60,9 @@ public class PunPlayerManager : MonoBehaviour {
 		if (update && stream.isWriting)
 		{
 			Debug.Log ("Serialising position information");
-			Vector3 pos = rb.position;
-			Vector3 velocity = rb.velocity;
-			Quaternion rot = trans.rotation;
+			Vector2 pos = rb.position;
+			Vector2 velocity = rb.velocity;
+			float rotation = rb.rotation;
 
 			stream.Serialize(ref pos);
 			stream.Serialize(ref velocity);
