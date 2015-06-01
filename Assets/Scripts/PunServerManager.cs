@@ -45,19 +45,18 @@ public class PunServerManager : MonoBehaviour {
 		playersSpawning = true;
 	}
 
-	void OnPhotonPlayerDisconnected (PhotonPlayer disonnected)
+	void OnPhotonPlayerDisconnected (PhotonPlayer disconnected)
 	{
-		Debug.Log ("Player " + disonnected.ToString () + " disonnected.");
+		Debug.Log ("Player " + disconnected.ToString () + " disconnected.");
 		PunPlayerManager found = null;
 		foreach (PunPlayerManager player in playersInGame)
 		{
-			if (player.Owner == disonnected)
+			if (player.Owner == disconnected)
 			{
 				found = player;
-				PhotonNetwork.RemoveRPCs (disonnected);
+				PhotonNetwork.RemoveRPCs (disconnected);
 				PhotonNetwork.RemoveRPCs (player.View);
 
-				View.RPC ("DespawnPlayer", PhotonTargets.Others, disonnected);
 				Destroy (player.gameObject);
 				PhotonNetwork.UnAllocateViewID (player.ViewID);
 			}
