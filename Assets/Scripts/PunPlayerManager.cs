@@ -62,11 +62,11 @@ public class PunPlayerManager : MonoBehaviour {
 		CheckChanges ();
 		// Compute movement from saved input
 		Vector2 moveForce = new Vector2 (strafe,thrust).normalized;
-		moveForce = new Vector2(moveForce.x * strafeModifier * Time.fixedDeltaTime,
-								moveForce.y * thrustModifier * Time.fixedDeltaTime);
+		moveForce = new Vector2(moveForce.x * strafeModifier,
+								moveForce.y * thrustModifier);
 		// Apply movement to the object
 		rb.AddForce (moveForce);
-		rb.AddTorque (torque * torqueModifier * Time.fixedDeltaTime);
+		rb.AddTorque (torque * torqueModifier);
 	}
 
 	/**
