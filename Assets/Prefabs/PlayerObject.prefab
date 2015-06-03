@@ -82,9 +82,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e6aa8cb7be3b42408e004194f4dceae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  strafeModifier: 100
-  thrustModifier: 100
-  torqueModifier: 1500
+  strafeModifier: 10
+  thrustModifier: 10
+  torqueModifier: 50
 --- !u!212 &21221272
 SpriteRenderer:
   m_ObjectHideFlags: 1
