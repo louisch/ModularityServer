@@ -78,14 +78,16 @@ public class ServerObjectManager : MonoBehaviour {
 		int controllerID = PhotonNetwork.AllocateViewID ();
 		int trackerID = PhotonNetwork.AllocateViewID ();
 		
-		PlayerController controller = constructor.ConstructPlayer (player, trackerID, controllerID);
+		Vector2 pos = new Vector2(0,0);
+		float rot = 0;
+		PlayerController controller = constructor.ConstructPlayer (player, trackerID, controllerID, pos, rot);
 		Debug.LogFormat ("Spawning player {0} with id {1}", player.ToString (), controllerID);
 
 		foreach (PlayerController inGame in playersInGame)
 		{
-			view.RPC ("SpawnPlayer", inGame.owner, player, trackerID, controllerID);
+			view.RPC ("SpawnPlayer", inGame.owner, player, trackerID, controllerID, pos, rot);
 		}
-		view.RPC ("SpawnPlayer", player, player, trackerID, controllerID);
+		view.RPC ("SpawnPlayer", player, player, trackerID, controllerID, pos, rot);
 
 		SpawnAllInPlayer (player);
 		playersInGame.Add (controller);
@@ -98,7 +100,10 @@ public class ServerObjectManager : MonoBehaviour {
 		// Spawn all players already in game in the connecting player.
 		foreach (PlayerController inGame in playersInGame)
 		{
-			view.RPC ("SpawnPlayer", player, inGame.owner, inGame.statusTracker.TrackerID, inGame.ControllerID);
+			Vector2 pos = inGame.RB.position;
+			float rot = inGame.RB.rotation;
+			Debug.LogFormat ("Spawning at {0}, {1}", pos, rot);
+			view.RPC ("SpawnPlayer", player, inGame.owner, inGame.statusTracker.TrackerID, inGame.ControllerID, pos, rot);
 		}
 
 		return true;

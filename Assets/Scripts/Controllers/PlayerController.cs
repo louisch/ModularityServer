@@ -29,6 +29,10 @@ public class PlayerController : MonoBehaviour {
 	Rigidbody2D rb;
 	public Rigidbody2D RB
 	{
+		get
+		{
+			return rb;
+		}
 		set
 		{
 			rb = value;
@@ -41,7 +45,7 @@ public class PlayerController : MonoBehaviour {
 	// Movement modifiers
 	public float strafeModifier = 10;
 	public float thrustModifier = 10;
-	public float torqueModifier = 50;
+	public float torqueModifier = 0.25f;
 	// Movement input from latest client update
 	float strafe;
 	float thrust;
@@ -121,11 +125,9 @@ public class PlayerController : MonoBehaviour {
 		if (update && stream.isWriting)
 		{
 			Vector2 pos = rb.position;
-			Vector2 velocity = rb.velocity;
 			float rotation = rb.rotation;
 
 			stream.Serialize(ref pos);
-			stream.Serialize(ref velocity);
 			stream.Serialize(ref rotation);
 		}
 		else if (!stream.isWriting)
