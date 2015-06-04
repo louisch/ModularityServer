@@ -8,7 +8,7 @@ using System.Collections;
 */
 [RequireComponent(typeof(PhotonView))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class PunPlayerManager : MonoBehaviour {
+public class PlayerController : MonoBehaviour {
 	// Object connection info
 	public PhotonPlayer Owner {get; set;}
 	public PhotonView View {get; private set;}

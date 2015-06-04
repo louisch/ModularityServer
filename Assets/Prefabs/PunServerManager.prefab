@@ -1,15 +1,16 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &180564
+--- !u!1 &106570
 GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 4
   m_Component:
-  - 4: {fileID: 436158}
-  - 114: {fileID: 11409364}
-  - 114: {fileID: 11426642}
+  - 4: {fileID: 453410}
+  - 114: {fileID: 11431608}
+  - 114: {fileID: 11421756}
+  - 114: {fileID: 11431640}
   m_Layer: 0
   m_Name: PunServerManager
   m_TagString: Untagged
@@ -17,24 +18,38 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &436158
+--- !u!4 &453410
 Transform:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 180564}
+  m_GameObject: {fileID: 106570}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.19999993, y: 0, z: 6.99999762}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!114 &11409364
+--- !u!114 &11421756
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 180564}
+  m_GameObject: {fileID: 106570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e8461a9b3444a1489ec2d78d224bc0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameVersion: v0.1dev
+  roomName: The Room
+  buttonSizeMultiplier: .100000001
+--- !u!114 &11431608
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 106570}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
@@ -54,20 +69,17 @@ MonoBehaviour:
   viewIdField: 0
   instantiationId: -1
   isRuntimeInstantiated: 0
---- !u!114 &11426642
+--- !u!114 &11431640
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 180564}
+  m_GameObject: {fileID: 106570}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e8461a9b3444a1489ec2d78d224bc0c, type: 3}
+  m_Script: {fileID: 11500000, guid: 3612deebffbb2994f979da81e5959ebe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameVersion: v0.1dev
-  roomName: The Room
-  mod: .100000001
   playerModel: {fileID: 148846, guid: 59c15f02353705742b928a05b8bc0530, type: 2}
 --- !u!1001 &100100000
 Prefab:
@@ -78,5 +90,5 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 180564}
+  m_RootGameObject: {fileID: 106570}
   m_IsPrefabParent: 1
