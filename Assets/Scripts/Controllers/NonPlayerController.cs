@@ -1,9 +1,21 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class NonPlayerController : MonoBehaviour {
+public class NonPlayerController : MonoBehaviour, IController {
 // Object connection info
-	public PhotonView view;
+	public PhotonPlayer Owner {get;set;}
+	PhotonView view;
+	public PhotonView View
+	{
+		get
+		{
+			return view;
+		}
+		set
+		{
+			view = value;
+		}
+	}
 	public int ControllerID
 	{
 		get
@@ -15,11 +27,11 @@ public class NonPlayerController : MonoBehaviour {
 			view.viewID = value;
 		}
 	}
-	public ObjectStatusTracker statusTracker;
-	
+	public ObjectStatusTracker StatusTracker {get;set;}	
+
 	// Reference to object's rigid body
 	Rigidbody2D rb;
-	public Rigidbody2D RB
+	public Rigidbody2D Rb
 	{
 		get
 		{
@@ -91,5 +103,10 @@ public class NonPlayerController : MonoBehaviour {
 	{
 		PhotonNetwork.RemoveRPCs (view);
 		PhotonNetwork.UnAllocateViewID (ControllerID);
+	}
+
+	public void Disconnect ()
+	{
+		// do nothing	
 	}
 }

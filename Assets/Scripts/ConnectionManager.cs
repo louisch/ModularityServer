@@ -33,8 +33,8 @@ public class ConnectionManager : MonoBehaviour {
 	*/
 	void OnConnectedToMaster ()
 	{
-		Debug.Log ("Creating room");
-		PhotonNetwork.CreateRoom (roomName);
+		Debug.Log ("Ready to create room");
+		roomOn = PhotonNetwork.CreateRoom (roomName);
 	}
 
 	/**

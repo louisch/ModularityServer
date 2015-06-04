@@ -8,10 +8,34 @@ using System.Collections;
 */
 [RequireComponent(typeof(PhotonView))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour {
+public class PlayerController : MonoBehaviour, IController {
 	// Object connection info
-	public PhotonPlayer owner;
-	public PhotonView view;
+	PhotonPlayer owner;
+	public PhotonPlayer Owner
+	{
+		get
+		{
+			return owner;
+		}
+		set
+		{
+			owner = value;
+		}
+	}
+
+	PhotonView view;
+	public PhotonView View
+	{
+		get
+		{
+			return view;
+		}
+		set
+		{
+			view = value;
+		}
+	}
+
 	public int ControllerID
 	{
 		get
@@ -23,11 +47,11 @@ public class PlayerController : MonoBehaviour {
 			view.viewID = value;
 		}
 	}
-	public ObjectStatusTracker statusTracker;
+	public ObjectStatusTracker StatusTracker {get;set;}
 	
 	// Reference to object's rigid body
 	Rigidbody2D rb;
-	public Rigidbody2D RB
+	public Rigidbody2D Rb
 	{
 		get
 		{
@@ -140,7 +164,20 @@ public class PlayerController : MonoBehaviour {
 	{
 		Debug.Log ("Player " + owner.ToString() + " despawned");
 		PhotonNetwork.RemoveRPCs (view);
+		PhotonNetwork.RemoveRPCs (owner);
 		PhotonNetwork.UnAllocateViewID (ControllerID);
 	}
-}
 
+	void OnPhotonPlayerDisconnected (PhotonPlayer disconnected)
+	{
+		if (disconnected == owner)
+		{
+			Destroy (gameObject);
+		}
+	}
+
+	public void Disconnect ()
+	{
+		OnPhotonPlayerDisconnected (owner);
+	}
+}

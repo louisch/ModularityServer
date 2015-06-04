@@ -134,6 +134,18 @@ Prefab:
       propertyPath: instantiationId
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 11431640, guid: 71a8aed1cadcb4047ac72c316c4b515e, type: 2}
+      propertyPath: mapSize.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 11431640, guid: 71a8aed1cadcb4047ac72c316c4b515e, type: 2}
+      propertyPath: mapSize.y
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 11431640, guid: 71a8aed1cadcb4047ac72c316c4b515e, type: 2}
+      propertyPath: samples
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 71a8aed1cadcb4047ac72c316c4b515e, type: 2}
   m_IsPrefabParent: 0

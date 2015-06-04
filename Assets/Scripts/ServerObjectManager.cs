@@ -18,13 +18,32 @@ public class ServerObjectManager : MonoBehaviour {
 	bool playersSpawning = false;
 
 	// Keeps track of spawned players
-	ICollection<PlayerController> playersInGame = new List<PlayerController> ();
+	ICollection<IController> playersInGame = new List<IController> ();
+	ICollection<IController> modulesInGame = new List<IController> ();
 
+	public Vector2 mapSize;
+	public int samples;
+	List<Vector2> spawnPoints = new List<Vector2> ();
+
+
+	Vector2 UniformSampleMap ()
+	{
+		return new Vector2 (Random.Range (-mapSize.x, mapSize.x), Random.Range (-mapSize.y, mapSize.y));
+	}
+
+	void SampleMapForSpawnPoints ()
+	{
+		for (int i = 0; i < samples; i++)
+		{
+			spawnPoints.Add (UniformSampleMap ());
+		}
+	}
 
 	void Awake ()
 	{
 		view = GetComponent<PhotonView> ();
 		constructor = GetComponent<ObjectConstructor> ();
+		SampleMapForSpawnPoints ();
 	}
 
 
@@ -75,17 +94,21 @@ public class ServerObjectManager : MonoBehaviour {
 	/* Spawns player in every client and in the server. */
 	bool SpawnPlayer (PhotonPlayer player)
 	{
-		int controllerID = PhotonNetwork.AllocateViewID ();
-		int trackerID = PhotonNetwork.AllocateViewID ();
-		
-		Vector2 pos = new Vector2(0,0);
+		int i = Random.Range (0, spawnPoints.Count);
+		Debug.Log (i);
+		Vector2 pos = spawnPoints[i];
+		spawnPoints.RemoveAt (i);
 		float rot = 0;
-		PlayerController controller = constructor.ConstructPlayer (player, trackerID, controllerID, pos, rot);
+
+		IController controller = constructor.ConstructPlayer (player, pos, rot);
+		int controllerID = controller.ControllerID;
+		int trackerID = controller.StatusTracker.TrackerID;
+
 		Debug.LogFormat ("Spawning player {0} with id {1}", player.ToString (), controllerID);
 
-		foreach (PlayerController inGame in playersInGame)
+		foreach (IController inGame in playersInGame)
 		{
-			view.RPC ("SpawnPlayer", inGame.owner, player, trackerID, controllerID, pos, rot);
+			view.RPC ("SpawnPlayer", inGame.Owner, player, trackerID, controllerID, pos, rot);
 		}
 		view.RPC ("SpawnPlayer", player, player, trackerID, controllerID, pos, rot);
 
@@ -98,12 +121,12 @@ public class ServerObjectManager : MonoBehaviour {
 	bool SpawnAllInPlayer (PhotonPlayer player)
 	{
 		// Spawn all players already in game in the connecting player.
-		foreach (PlayerController inGame in playersInGame)
+		foreach (IController inGame in playersInGame)
 		{
-			Vector2 pos = inGame.RB.position;
-			float rot = inGame.RB.rotation;
+			Vector2 pos = inGame.Rb.position;
+			float rot = inGame.Rb.rotation;
 			Debug.LogFormat ("Spawning at {0}, {1}", pos, rot);
-			view.RPC ("SpawnPlayer", player, inGame.owner, inGame.statusTracker.TrackerID, inGame.ControllerID, pos, rot);
+			view.RPC ("SpawnPlayer", player, inGame.Owner, inGame.StatusTracker.TrackerID, inGame.ControllerID, pos, rot);
 		}
 
 		return true;
@@ -146,19 +169,18 @@ public class ServerObjectManager : MonoBehaviour {
 	/* Removes player from game and clears all associated RPCs. */
 	bool RemovePlayerFromGame (PhotonPlayer player)
 	{
-		PlayerController found = null;
-		foreach (PlayerController inGame in playersInGame)
+		IController found = null;
+		foreach (IController inGame in playersInGame)
 		{
-			if (inGame.owner == player)
+			if (inGame.Owner == player)
 			{
 				found = inGame;
-				PhotonNetwork.RemoveRPCs (player);
-				Destroy (inGame.gameObject);
 			}
 		}
 
-		if (found)
+		if (found != null)
 		{
+			found.Disconnect ();
 			playersInGame.Remove (found);
 		}
 		return found != null;
