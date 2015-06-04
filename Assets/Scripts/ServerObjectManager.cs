@@ -7,7 +7,9 @@ using System.Collections.Generic;
 */
 [RequireComponent(typeof(PhotonView))]
 public class ServerObjectManager : MonoBehaviour {
-	PhotonView View {get; set;}
+	PhotonView view;
+
+	ObjectConstructor constructor;
 
 	/* Player management */
 	// Keeps track of connected, but unspawned players
@@ -17,12 +19,12 @@ public class ServerObjectManager : MonoBehaviour {
 
 	// Keeps track of spawned players
 	ICollection<PlayerController> playersInGame = new List<PlayerController> ();
-	// default player object prefab
-	public GameObject playerModel;
+
 
 	void Awake ()
 	{
-		View = GetComponent<PhotonView> ();
+		view = GetComponent<PhotonView> ();
+		constructor = GetComponent<ObjectConstructor> ();
 	}
 
 
@@ -73,23 +75,17 @@ public class ServerObjectManager : MonoBehaviour {
 	/* Spawns player in every client and in the server. */
 	bool SpawnPlayer (PhotonPlayer player)
 	{
-		GameObject handle = Instantiate (playerModel) as GameObject;
-		PlayerController controller = handle.GetComponent<PlayerController> ();
-		if (!controller)
-		{
-			Debug.LogError ("Spawn failed: no player controller found on player object.");
-			return false;
-		}
-		int viewID = PhotonNetwork.AllocateViewID ();
-		controller.Owner = player;
-		controller.ViewID = viewID;
+		int controllerID = PhotonNetwork.AllocateViewID ();
+		int trackerID = PhotonNetwork.AllocateViewID ();
+		
+		PlayerController controller = constructor.ConstructPlayer (player, trackerID, controllerID);
+		Debug.LogFormat ("Spawning player {0} with id {1}", player.ToString (), controllerID);
 
-		Debug.LogFormat ("Spawning player {0} with id {1}", player.ToString (), viewID);
 		foreach (PlayerController inGame in playersInGame)
 		{
-			View.RPC ("SpawnPlayer", inGame.Owner, player, viewID);
+			view.RPC ("SpawnPlayer", inGame.owner, player, trackerID, controllerID);
 		}
-		View.RPC ("SpawnPlayer", player, player, viewID);
+		view.RPC ("SpawnPlayer", player, player, trackerID, controllerID);
 
 		SpawnAllInPlayer (player);
 		playersInGame.Add (controller);
@@ -102,7 +98,7 @@ public class ServerObjectManager : MonoBehaviour {
 		// Spawn all players already in game in the connecting player.
 		foreach (PlayerController inGame in playersInGame)
 		{
-			View.RPC ("SpawnPlayer", player, inGame.Owner, inGame.ViewID);
+			view.RPC ("SpawnPlayer", player, inGame.owner, inGame.statusTracker.TrackerID, inGame.ControllerID);
 		}
 
 		return true;
@@ -148,14 +144,11 @@ public class ServerObjectManager : MonoBehaviour {
 		PlayerController found = null;
 		foreach (PlayerController inGame in playersInGame)
 		{
-			if (inGame.Owner == player)
+			if (inGame.owner == player)
 			{
 				found = inGame;
 				PhotonNetwork.RemoveRPCs (player);
-				PhotonNetwork.RemoveRPCs (inGame.View);
-
 				Destroy (inGame.gameObject);
-				PhotonNetwork.UnAllocateViewID (inGame.ViewID);
 			}
 		}
 

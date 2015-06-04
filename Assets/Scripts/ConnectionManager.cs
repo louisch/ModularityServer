@@ -6,9 +6,6 @@ using System.Collections;
 */
 [RequireComponent(typeof(PhotonView))]
 public class ConnectionManager : MonoBehaviour {
-	/* Server's photon view controller */
-	PhotonView View {get; set;}
-
 	/* Game/server/room information */
 	public string gameVersion = "v0.1dev";
 	public string roomName = "The Room";
@@ -28,8 +25,6 @@ public class ConnectionManager : MonoBehaviour {
 		btnY = Screen.height * buttonSizeMultiplier;
 		btnH = Screen.width * buttonSizeMultiplier;
 		btnW = Screen.width * buttonSizeMultiplier;
-
-		View = GetComponent<PhotonView> ();
 	}
 
 	/**

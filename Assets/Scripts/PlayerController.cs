@@ -10,24 +10,38 @@ using System.Collections;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour {
 	// Object connection info
-	public PhotonPlayer Owner {get; set;}
-	public PhotonView View {get; private set;}
-	public int ViewID
+	public PhotonPlayer owner;
+	public PhotonView view;
+	public int ControllerID
 	{
 		get
 		{
-			return View.viewID;
+			return view.viewID;
 		}
 		set
 		{
-			View.viewID = value;
+			view.viewID = value;
+		}
+	}
+	public ObjectStatusTracker statusTracker;
+	
+	// Reference to object's rigid body
+	Rigidbody2D rb;
+	public Rigidbody2D RB
+	{
+		set
+		{
+			rb = value;
+			previousRotation = rb.rotation;
+			previousPosition = rb.position;
+			
 		}
 	}
 
 	// Movement modifiers
-	public float strafeModifier = 100;
-	public float thrustModifier = 100;
-	public float torqueModifier = 5;
+	public float strafeModifier = 10;
+	public float thrustModifier = 10;
+	public float torqueModifier = 50;
 	// Movement input from latest client update
 	float strafe;
 	float thrust;
@@ -36,9 +50,6 @@ public class PlayerController : MonoBehaviour {
 	Vector2 previousPosition;
 	float previousRotation;
 	bool update = false;
-	
-	// Reference to object's rigid body
-	Rigidbody2D rb;
 
 	/**
 	* Runs setup on newly created player object.
@@ -47,10 +58,6 @@ public class PlayerController : MonoBehaviour {
 	void Awake ()
 	{
 		Debug.Log ("Player created");
-		rb = GetComponent<Rigidbody2D> ();
-		View = GetComponent<PhotonView> ();
-		previousRotation = rb.rotation;
-		previousPosition = rb.position;
 	}
 
 	/**
@@ -59,7 +66,7 @@ public class PlayerController : MonoBehaviour {
 	*/
 	void FixedUpdate ()
 	{
-		CheckChanges ();
+		DetectChange ();
 		// Compute movement from saved input
 		Vector2 moveForce = new Vector2 (strafe,thrust).normalized;
 		moveForce = new Vector2(moveForce.x * strafeModifier,
@@ -73,7 +80,7 @@ public class PlayerController : MonoBehaviour {
 	* Checks if object's state has changed since last call.
 	* Updates the state tracking fields if it has.
 	*/
-	void CheckChanges ()
+	void DetectChange ()
 	{
 		// sets update only if position or rotation has changed
 		update = previousPosition != rb.position || previousRotation != rb.rotation;
@@ -93,11 +100,11 @@ public class PlayerController : MonoBehaviour {
 	[RPC]
 	public void UpdateInput (float strafe, float thrust, float torque, PhotonMessageInfo info)
 	{
-		if (info.sender != Owner)
+		if (info.sender != owner)
 		{
 			Debug.LogWarningFormat ("Illegal UpdateInput attempt: player {0} attempted to move player {1}",
 									info.sender.ToString (),
-									Owner.ToString ());
+									owner.ToString ());
 			return;
 		}
 		this.strafe = strafe;
@@ -125,6 +132,13 @@ public class PlayerController : MonoBehaviour {
 		{
 			Debug.LogError ("Server object is receiving positional info from client");
 		}
+	}
+
+	void OnDestroy ()
+	{
+		Debug.Log ("Player " + owner.ToString() + " despawned");
+		PhotonNetwork.RemoveRPCs (view);
+		PhotonNetwork.UnAllocateViewID (ControllerID);
 	}
 }
 
