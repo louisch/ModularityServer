@@ -13,14 +13,19 @@ public class ObjectConstructor : MonoBehaviour {
 	public IController ConstructPlayer (PhotonPlayer owner, Vector2 position, float rotation)
 	{
 		GameObject player = InstantiateModule(playerModule, owner, "player");
-		return AddModuleComponents (player, owner, new PilotModuleRigidbodyInfo (), position, rotation);
+
+		Rigidbody2D rb = AddRigidbody (player, new PilotModuleRigidbodyInfo (), position, rotation);
+		ObjectStatusTracker tracker = AddStatusTracker (player, rb);
+		return AddController (player, owner, rb, tracker);
 	}
 
 	/* Constructs a random module module in game. */
 	public IController ConstructRandomModule (Vector2 position, float rotation)
 	{
 		GameObject module = InstantiateModule(randomModule, PhotonNetwork.player, "randomModule");
-		return AddModuleComponents (module, PhotonNetwork.player, new RandomModuleRigidbodyInfo (), position, rotation);
+		Rigidbody2D rb = AddRigidbody (module, new RandomModuleRigidbodyInfo (), position, rotation);
+		ObjectStatusTracker tracker = AddStatusTracker (module, rb);
+		return AddController (module, PhotonNetwork.player, rb, tracker);
 	}
 
 	GameObject InstantiateModule (GameObject prefab, PhotonPlayer owner, string nameString)

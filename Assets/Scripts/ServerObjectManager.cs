@@ -88,6 +88,17 @@ public class ServerObjectManager : MonoBehaviour {
 		{
 			Debug.Log ("Done spawning!");
 			playersSpawning = false;
+			SpawnRandomModules ();
+
+		}
+	}
+
+	void SpawnRandomModules ()
+	{
+		foreach (Vector2 pos in spawnPoints)
+		{
+			IController module = constructor.ConstructRandomModule (pos, 0);
+			view.RPC ("SpawnObject", PhotonTargets.Others, module.StatusTracker.TrackerID, module.ControllerID, module.Rb.position, module.Rb.rotation);
 		}
 	}
 

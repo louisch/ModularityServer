@@ -43,10 +43,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerModule: {fileID: 104844, guid: 50e3ea67e4bedfb44bdd7aed794cee69, type: 2}
-  defaultPlayerMass: 1
-  defaultPlayerDrag: 4
-  defaultPlayerAngularDrag: 10
-  playerZ: 3
+  randomModule: {fileID: 129456, guid: 2d6b55f985a507f46b6750f2be5c046f, type: 2}
+  moduleSpawnZ: 3
 --- !u!114 &11421756
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -97,6 +95,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3612deebffbb2994f979da81e5959ebe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mapSize: {x: 10, y: 10}
+  samples: 10
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

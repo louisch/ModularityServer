@@ -51,15 +51,6 @@ public class NonPlayerController : MonoBehaviour, IController {
 	float previousRotation;
 
 	/**
-	* Runs setup on newly created player object.
-	* (self-documenting)
-	*/
-	void Awake ()
-	{
-		Debug.Log ("Object created");
-	}
-
-	/**
 	* Checks if object's state has changed since last call.
 	* Updates the state tracking fields if it has.
 	*/
@@ -86,11 +77,9 @@ public class NonPlayerController : MonoBehaviour, IController {
 		if (DetectChange () && stream.isWriting)
 		{
 			Vector2 pos = rb.position;
-			Vector2 velocity = rb.velocity;
 			float rotation = rb.rotation;
 
 			stream.Serialize(ref pos);
-			stream.Serialize(ref velocity);
 			stream.Serialize(ref rotation);
 		}
 		else if (!stream.isWriting)
