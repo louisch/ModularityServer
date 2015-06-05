@@ -54,9 +54,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5630e89407a8ccb4087a8158d640933c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minTick: .5
-  maxTick: .5
-  speed: 5
+  minTick: .00999999978
+  maxTick: .00999999978
+  speed: 20
 --- !u!212 &21225996
 SpriteRenderer:
   m_ObjectHideFlags: 1

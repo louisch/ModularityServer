@@ -88,7 +88,7 @@ public class ServerObjectManager : MonoBehaviour {
 		{
 			Debug.Log ("Done spawning!");
 			playersSpawning = false;
-			SpawnRandomModules ();
+			//SpawnRandomModules ();
 
 		}
 	}
