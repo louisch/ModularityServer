@@ -92,11 +92,8 @@ public class PlayerController : MonoBehaviour, IController {
 	*/
 	void FixedUpdate ()
 	{
-		// get normalized input vector
-		Vector2 inputVector = new Vector2 (strafe,thrust).normalized;
-
 		// apply input to client model
-		move.Move (ref rb, inputVector, torque);
+		move.Move (ref rb, strafe, thrust, torque);
 	}
 
 	/**
