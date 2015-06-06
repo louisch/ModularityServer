@@ -69,7 +69,7 @@ public class PlayerController : MonoBehaviour, IController {
 	// Movement modifiers
 	public float strafeModifier = 10;
 	public float thrustModifier = 10;
-	public float torqueModifier = 0.25f;
+	public float torqueModifier = .25f;
 	// Movement input from latest client update
 	float strafe;
 	float thrust;
@@ -94,7 +94,6 @@ public class PlayerController : MonoBehaviour, IController {
 	*/
 	void FixedUpdate ()
 	{
-		DetectChange ();
 		// Compute movement from saved input
 		Vector2 moveForce = new Vector2 (strafe,thrust).normalized;
 		moveForce = new Vector2(moveForce.x * strafeModifier,
@@ -102,23 +101,6 @@ public class PlayerController : MonoBehaviour, IController {
 		// Apply movement to the object
 		rb.AddForce (moveForce);
 		rb.AddTorque (torque * torqueModifier);
-	}
-
-	/**
-	* Checks if object's state has changed since last call.
-	* Updates the state tracking fields if it has.
-	*/
-	void DetectChange ()
-	{
-		// sets update only if position or rotation has changed
-		update = previousPosition != rb.position || previousRotation != rb.rotation;
-		if (update)
-		{
-			// update state fields
-			previousPosition = rb.position;
-			previousRotation = rb.rotation;
-		}
-
 	}
 
 	/**
@@ -146,7 +128,7 @@ public class PlayerController : MonoBehaviour, IController {
 	*/
 	void OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
 	{
-		if (update && stream.isWriting)
+		if (DetectChange () && stream.isWriting)
 		{
 			Vector2 pos = rb.position;
 			float rotation = rb.rotation;
@@ -158,6 +140,23 @@ public class PlayerController : MonoBehaviour, IController {
 		{
 			Debug.LogError ("Server object is receiving positional info from client");
 		}
+	}
+
+	/**
+	* Checks if object's state has changed since last call.
+	* Updates the state tracking fields if it has.
+	*/
+	bool DetectChange ()
+	{
+		// sets update only if position or rotation has changed
+		bool update = previousPosition != rb.position || previousRotation != rb.rotation;
+		if (update)
+		{
+			// update state fields
+			previousPosition = rb.position;
+			previousRotation = rb.rotation;
+		}
+		return update;
 	}
 
 	void OnDestroy ()
