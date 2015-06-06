@@ -41,7 +41,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Size: {x: .140000001, y: .140000001}
+  m_Size: {x: 1, y: 1}
 --- !u!212 &21298240
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -66,7 +66,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 21300000, guid: e0de60761abe85f4383646c78968ebce, type: 3}
   m_Color: {r: .486591697, g: .91911763, b: .525369883, a: 1}
 --- !u!1001 &100100000
 Prefab:

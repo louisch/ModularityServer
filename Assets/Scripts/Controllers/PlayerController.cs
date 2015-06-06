@@ -67,9 +67,7 @@ public class PlayerController : MonoBehaviour, IController {
 	}
 
 	// Movement modifiers
-	public float strafeModifier = 10;
-	public float thrustModifier = 10;
-	public float torqueModifier = .25f;
+	public PlayerMovement move;
 	// Movement input from latest client update
 	float strafe;
 	float thrust;
@@ -77,7 +75,6 @@ public class PlayerController : MonoBehaviour, IController {
 	// Fields used to determine whether the state of an object changed since the previous call to FixedUpdate
 	Vector2 previousPosition;
 	float previousRotation;
-	bool update = false;
 
 	/**
 	* Runs setup on newly created player object.
@@ -86,6 +83,7 @@ public class PlayerController : MonoBehaviour, IController {
 	void Awake ()
 	{
 		Debug.Log ("Player created");
+		move = new PlayerMovement ();
 	}
 
 	/**
@@ -94,13 +92,11 @@ public class PlayerController : MonoBehaviour, IController {
 	*/
 	void FixedUpdate ()
 	{
-		// Compute movement from saved input
-		Vector2 moveForce = new Vector2 (strafe,thrust).normalized;
-		moveForce = new Vector2(moveForce.x * strafeModifier,
-								moveForce.y * thrustModifier);
-		// Apply movement to the object
-		rb.AddForce (moveForce);
-		rb.AddTorque (torque * torqueModifier);
+		// get normalized input vector
+		Vector2 inputVector = new Vector2 (strafe,thrust).normalized;
+
+		// apply input to client model
+		move.Move (ref rb, inputVector, torque);
 	}
 
 	/**
