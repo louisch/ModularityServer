@@ -41,3 +41,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: module
+    uniqueID: 196017653
+    locked: 0
+  - name: turret
+    uniqueID: 1463293551
+    locked: 0
+  - name: projectile
+    uniqueID: 2929019719
+    locked: 0

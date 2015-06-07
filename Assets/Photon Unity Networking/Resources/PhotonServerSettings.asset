@@ -32,4 +32,7 @@ MonoBehaviour:
   - RequestSpawn
   - SpawnPlayer
   - UpdateInput
+  - FIRE
+  - MouseUpdate
+  - FireAllTurrets
   DisableAutoOpenWizard: 0
