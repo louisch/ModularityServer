@@ -87,76 +87,6 @@ NavMeshSettings:
     cellSize: .166666672
     manualCellSize: 0
   m_NavMeshData: {fileID: 0}
---- !u!114 &180572055 stripped
-MonoBehaviour:
-  m_PrefabParentObject: {fileID: 11427436, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4,
-    type: 2}
-  m_PrefabInternal: {fileID: 451939915}
-  m_Script: {fileID: 11500000, guid: 7c528cb0fcebc4f02bffd43d5946cb52, type: 3}
---- !u!1001 &451939915
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 11448162, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: barrels.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 425148, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 425148, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 425148, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 425148, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 425148, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 425148, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 425148, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 425148, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11448162, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: barrels.Array.data[0]
-      value: 
-      objectReference: {fileID: 180572055}
-    - target: {fileID: 21296566, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: m_SortingLayerID
-      value: 196017653
-      objectReference: {fileID: 0}
-    - target: {fileID: 21212134, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-      propertyPath: m_SortingLayerID
-      value: 1463293551
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-  m_IsPrefabParent: 0
---- !u!114 &451939916 stripped
-MonoBehaviour:
-  m_PrefabParentObject: {fileID: 11448162, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4,
-    type: 2}
-  m_PrefabInternal: {fileID: 451939915}
-  m_Script: {fileID: 11500000, guid: e969ef9bb779d744d8c98146f60f262d, type: 3}
 --- !u!1001 &1505955657
 Prefab:
   m_ObjectHideFlags: 0
@@ -216,49 +146,14 @@ Prefab:
       propertyPath: samples
       value: 1000
       objectReference: {fileID: 0}
+    - target: {fileID: 11431640, guid: 71a8aed1cadcb4047ac72c316c4b515e, type: 2}
+      propertyPath: playerModel
+      value: 
+      objectReference: {fileID: 104844, guid: 50e3ea67e4bedfb44bdd7aed794cee69, type: 2}
+    - target: {fileID: 11431640, guid: 71a8aed1cadcb4047ac72c316c4b515e, type: 2}
+      propertyPath: turretModel
+      value: 
+      objectReference: {fileID: 188618, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 71a8aed1cadcb4047ac72c316c4b515e, type: 2}
   m_IsPrefabParent: 0
---- !u!1 &1915094684 stripped
-GameObject:
-  m_PrefabParentObject: {fileID: 188618, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-  m_PrefabInternal: {fileID: 451939915}
---- !u!114 &1915094685
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1915094684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ownerId: 0
-  group: 0
-  prefixBackup: -1
-  observed: {fileID: 0}
-  synchronization: 3
-  onSerializeTransformOption: 3
-  onSerializeRigidBodyOption: 2
-  ownershipTransfer: 0
-  ObservedComponents:
-  - {fileID: 1915094686}
-  ObservedComponentsFoldoutOpen: 1
-  viewIdField: 20
-  instantiationId: 20
-  isRuntimeInstantiated: 0
---- !u!114 &1915094686
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1915094684}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 61758233a1f267a4b87497b3fc51ce65, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  view: {fileID: 1915094685}
-  turrets:
-  - {fileID: 451939916}

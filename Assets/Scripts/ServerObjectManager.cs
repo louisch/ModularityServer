@@ -9,17 +9,18 @@ using System.Collections.Generic;
 public class ServerObjectManager : MonoBehaviour {
 	PhotonView view;
 
-	ObjectConstructor constructor;
-
 	/* Player management */
 	// Keeps track of connected, but unspawned players
 	ICollection<PhotonPlayer> playersInLobby = new List<PhotonPlayer> ();
 	// true if server is currently accepting spawn requests
 	bool playersSpawning = false;
 
+	public GameObject playerModel;
+	public GameObject turretModel;
+
 	// Keeps track of spawned players
-	ICollection<IController> playersInGame = new List<IController> ();
-	ICollection<IController> modulesInGame = new List<IController> ();
+	ICollection<GameObject> playersInGame = new List<GameObject> ();
+	ICollection<GameObject> modulesInGame = new List<GameObject> ();
 
 	public Vector2 mapSize;
 	public int samples;
@@ -42,7 +43,6 @@ public class ServerObjectManager : MonoBehaviour {
 	void Awake ()
 	{
 		view = GetComponent<PhotonView> ();
-		constructor = GetComponent<ObjectConstructor> ();
 		SampleMapForSpawnPoints ();
 	}
 
@@ -88,17 +88,6 @@ public class ServerObjectManager : MonoBehaviour {
 		{
 			Debug.Log ("Done spawning!");
 			playersSpawning = false;
-			//SpawnRandomModules ();
-
-		}
-	}
-
-	void SpawnRandomModules ()
-	{
-		foreach (Vector2 pos in spawnPoints)
-		{
-			IController module = constructor.ConstructRandomModule (pos, 0);
-			view.RPC ("SpawnObject", PhotonTargets.Others, module.StatusTracker.TrackerID, module.ControllerID, module.Rb.position, module.Rb.rotation);
 		}
 	}
 
@@ -111,20 +100,20 @@ public class ServerObjectManager : MonoBehaviour {
 		spawnPoints.RemoveAt (i);
 		float rot = 0;
 
-		IController controller = constructor.ConstructPlayer (player, pos, rot);
-		int controllerID = controller.ControllerID;
-		int trackerID = controller.StatusTracker.TrackerID;
+		GameObject playerModule = ObjectConstructor.ConstructPlayer (playerModel, player, pos, rot);
+		int controllerID = playerModule.GetComponent<PlayerController>().view.viewID;
 
 		Debug.LogFormat ("Spawning player {0} with id {1}", player.ToString (), controllerID);
 
-		foreach (IController inGame in playersInGame)
+		foreach (GameObject inGame in playersInGame)
 		{
-			view.RPC ("SpawnPlayer", inGame.Owner, player, trackerID, controllerID, pos, rot);
+			PhotonPlayer playerInGame = inGame.GetComponent<PlayerController> ().owner;
+			view.RPC ("SpawnPlayer", playerInGame, player, controllerID, pos, rot);
 		}
-		view.RPC ("SpawnPlayer", player, player, trackerID, controllerID, pos, rot);
+		view.RPC ("SpawnPlayer", player, player, controllerID, pos, rot);
 
 		SpawnAllInPlayer (player);
-		playersInGame.Add (controller);
+		playersInGame.Add (playerModule);
 		return true;
 	}
 
@@ -132,12 +121,13 @@ public class ServerObjectManager : MonoBehaviour {
 	bool SpawnAllInPlayer (PhotonPlayer player)
 	{
 		// Spawn all players already in game in the connecting player.
-		foreach (IController inGame in playersInGame)
+		foreach (GameObject inGame in playersInGame)
 		{
-			Vector2 pos = inGame.Rb.position;
-			float rot = inGame.Rb.rotation;
-			Debug.LogFormat ("Spawning at {0}, {1}", pos, rot);
-			view.RPC ("SpawnPlayer", player, inGame.Owner, inGame.StatusTracker.TrackerID, inGame.ControllerID, pos, rot);
+			PlayerController playerInGame = inGame.GetComponent<PlayerController> ();
+
+			Vector2 pos = inGame.transform.position;
+			float rot = inGame.transform.rotation.eulerAngles.z;
+			view.RPC ("SpawnPlayer", player, playerInGame.owner, playerInGame.view.viewID, pos, rot);
 		}
 
 		return true;
@@ -180,19 +170,19 @@ public class ServerObjectManager : MonoBehaviour {
 	/* Removes player from game and clears all associated RPCs. */
 	bool RemovePlayerFromGame (PhotonPlayer player)
 	{
-		IController found = null;
-		foreach (IController inGame in playersInGame)
+		PlayerController found = null;
+		foreach (GameObject inGame in playersInGame)
 		{
-			if (inGame.Owner == player)
+			if (inGame.GetComponent<PlayerController>().owner == player)
 			{
-				found = inGame;
+				found = inGame.GetComponent<PlayerController>();
 			}
 		}
 
 		if (found != null)
 		{
 			found.Disconnect ();
-			playersInGame.Remove (found);
+			playersInGame.Remove (found.gameObject);
 		}
 		return found != null;
 	}

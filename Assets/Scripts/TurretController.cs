@@ -8,10 +8,17 @@ public class TurretController : MonoBehaviour {
 	public Turret[] turrets;
 
 	Vector2 mouse;
-	
+
+	public void Setup (PhotonPlayer owner, PhotonView view)
+	{
+		this.owner = owner;
+		this.view = view;
+		turrets = GetComponentsInChildren<Turret> ();
+	}
+
 	void FixedUpdate ()
 	{
-		if (owner == null)
+		if (!owner.isLocal)
 		{
 			foreach (Turret turret in turrets)
 			{

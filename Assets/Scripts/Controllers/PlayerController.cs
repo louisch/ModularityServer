@@ -6,65 +6,13 @@ using System.Collections;
 * It receives and applies input updates from client players
 * and broadcasts position updates to all clients.
 */
-[RequireComponent(typeof(PhotonView))]
-[RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour, IController {
+public class PlayerController : MonoBehaviour {
 	// Object connection info
-	PhotonPlayer owner;
-	public PhotonPlayer Owner
-	{
-		get
-		{
-			return owner;
-		}
-		set
-		{
-			owner = value;
-		}
-	}
-
-	PhotonView view;
-	public PhotonView View
-	{
-		get
-		{
-			return view;
-		}
-		set
-		{
-			view = value;
-		}
-	}
-
-	public int ControllerID
-	{
-		get
-		{
-			return view.viewID;
-		}
-		set
-		{
-			view.viewID = value;
-		}
-	}
-	public ObjectStatusTracker StatusTracker {get;set;}
+	public PhotonPlayer owner;
+	public PhotonView view;
 	
 	// Reference to object's rigid body
 	Rigidbody2D rb;
-	public Rigidbody2D Rb
-	{
-		get
-		{
-			return rb;
-		}
-		set
-		{
-			rb = value;
-			previousRotation = rb.rotation;
-			previousPosition = rb.position;
-			
-		}
-	}
 
 	// Movement modifiers
 	public PlayerMovement move;
@@ -84,6 +32,17 @@ public class PlayerController : MonoBehaviour, IController {
 	{
 		Debug.Log ("Player created");
 		move = new PlayerMovement ();
+	}
+
+	public void Setup (PhotonPlayer owner, PhotonView view)
+	{
+
+		this.owner = owner;
+		this.view = view;
+
+		rb = GetComponent<Rigidbody2D> ();
+		previousRotation = rb.rotation;
+		previousPosition = rb.position;	
 	}
 
 	/**
@@ -157,7 +116,7 @@ public class PlayerController : MonoBehaviour, IController {
 		Debug.Log ("Player " + owner.ToString() + " despawned");
 		PhotonNetwork.RemoveRPCs (view);
 		PhotonNetwork.RemoveRPCs (owner);
-		PhotonNetwork.UnAllocateViewID (ControllerID);
+		PhotonNetwork.UnAllocateViewID (view.viewID);
 	}
 
 	void OnPhotonPlayerDisconnected (PhotonPlayer disconnected)

@@ -2,49 +2,58 @@
 using System.Collections;
 
 public class ObjectConstructor : MonoBehaviour {
-
-	// player variables
-	public GameObject playerModule;
-	public GameObject randomModule;
-
-	public float moduleSpawnZ = 3;
+	public static float moduleSpawnZ = 3;
 
 	/* Constructs a player object in game. */
-	public IController ConstructPlayer (PhotonPlayer owner, Vector2 position, float rotation)
+	public static GameObject ConstructPlayer (GameObject prefab, PhotonPlayer owner, Vector2 position, float rotation)
 	{
-		GameObject player = InstantiateModule(playerModule, owner, "player");
+		GameObject player = InstantiateModuleWithName (prefab, position, rotation, "player " + owner.ToString());
+		player.SetActive (false);
+		AddRigidbody (player, new PilotModuleRigidbodyInfo ());
 
-		Rigidbody2D rb = AddRigidbody (player, new PilotModuleRigidbodyInfo (), position, rotation);
-		ObjectStatusTracker tracker = AddStatusTracker (player, rb);
-		return AddController (player, owner, rb, tracker);
+		PlayerController controller = player.AddComponent<PlayerController> ();
+		PhotonView view = AddViewForComponent (controller, PhotonNetwork.AllocateViewID ());
+
+		controller.Setup (owner, view);
+		player.SetActive (true);
+		return player;
 	}
 
-	/* Constructs a random module module in game. */
-	public IController ConstructRandomModule (Vector2 position, float rotation)
+	public static GameObject ConstructTurret (GameObject prefab, Vector2 position, float rotation)
 	{
-		GameObject module = InstantiateModule(randomModule, PhotonNetwork.player, "randomModule");
-		Rigidbody2D rb = AddRigidbody (module, new RandomModuleRigidbodyInfo (), position, rotation);
-		ObjectStatusTracker tracker = AddStatusTracker (module, rb);
-		return AddController (module, PhotonNetwork.player, rb, tracker);
+		GameObject turret = InstantiateModuleWithName (prefab, position, rotation, prefab.name);
+		turret.SetActive (false);
+		AddRigidbody (turret, new RandomModuleRigidbodyInfo ());
+
+		TurretController controller = turret.AddComponent<TurretController> ();
+		PhotonView view = AddViewForComponent (controller, PhotonNetwork.AllocateViewID ());
+
+		controller.Setup (PhotonNetwork.player, view);
+		turret.SetActive (true);
+		return turret;
 	}
 
-	GameObject InstantiateModule (GameObject prefab, PhotonPlayer owner, string nameString)
+	static GameObject InstantiateModuleWithName (GameObject prefab, Vector2 position, float rotation, string nameString)
 	{
-		GameObject module = Instantiate<GameObject> (prefab);
-		module.name = "(construct)" + nameString + " " + owner.ToString ();
+		GameObject module = Instantiate (prefab, position, Quaternion.Euler (0,0,rotation)) as GameObject;
+		module.name = "(construct)" + nameString;
+
 		return module;
 	}
 
-	IController AddModuleComponents (GameObject module, PhotonPlayer owner, RigidbodyInfo info, Vector2 position, float rotation)
+	static PhotonView AddViewForComponent (Component component, int id)
 	{
-		Rigidbody2D rb = AddRigidbody (module, info, position, rotation);
-		ObjectStatusTracker tracker = AddStatusTracker (module, rb);
-		return AddController (module, owner, rb, tracker);
+		PhotonView view = component.gameObject.AddComponent<PhotonView> ();
+
+		view.observed = component;
+		view.viewID = id;
+		view.synchronization = ViewSynchronization.UnreliableOnChange;
+
+		return view;
 	}
 
-	Rigidbody2D AddRigidbody (GameObject module, RigidbodyInfo info, Vector2 position, float rotation)
+	static Rigidbody2D AddRigidbody (GameObject module, RigidbodyInfo info)
 	{
-		Vector3 pos = (Vector3)position + new Vector3 (0,0,moduleSpawnZ);
 		Rigidbody2D rb = module.AddComponent<Rigidbody2D> ();
 		// disable ridigbody
 		rb.Sleep ();
@@ -53,54 +62,9 @@ public class ObjectConstructor : MonoBehaviour {
 		rb.drag = info.drag;
 		rb.angularDrag = info.angularDrag;
 		rb.gravityScale = info.gravityScale;
-		// set object's positional info
-		module.transform.position = pos;
-		rb.rotation = rotation;
 		// re-enable rigidbody
 		rb.WakeUp ();
 
 		return rb;
-	}
-
-	ObjectStatusTracker AddStatusTracker (GameObject module, Rigidbody2D rb)
-	{
-		// add photon view and tracker
-		PhotonView view = module.AddComponent<PhotonView> ();
-		ObjectStatusTracker tracker = module.AddComponent<ObjectStatusTracker> ();
-		tracker.view = view;
-		tracker.RB = rb;
-		tracker.TrackerID = PhotonNetwork.AllocateViewID ();
-
-		// setup view to use the tracker
-		view.observed = tracker;
-		view.synchronization = ViewSynchronization.UnreliableOnChange;
-
-		return tracker;
-	}
-
-	IController AddController (GameObject module, PhotonPlayer owner, Rigidbody2D rb, ObjectStatusTracker tracker)
-	{
-		PhotonView view = module.AddComponent<PhotonView> ();
-		IController controller;
-		if (!owner.isLocal)
-		{
-			controller = module.AddComponent<PlayerController> ();
-		}
-		else
-		{
-			controller = module.AddComponent<NonPlayerController> ();
-		}
-
-		controller.Owner = owner;
-		controller.View = view;
-		controller.ControllerID = PhotonNetwork.AllocateViewID ();
-		controller.StatusTracker = tracker;
-		controller.Rb = rb;
-
-		// setup view to observe the controller
-		view.observed = controller as Component;
-		view.synchronization = ViewSynchronization.UnreliableOnChange;
-
-		return controller;
 	}
 }
