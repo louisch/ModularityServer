@@ -9,12 +9,14 @@ public class ObjectConstructor : MonoBehaviour {
 	{
 		GameObject player = InstantiateModuleWithName (prefab, position, rotation, "player " + owner.ToString());
 		player.SetActive (false);
+		
 		AddRigidbody (player, new PilotModuleRigidbodyInfo ());
 
 		PlayerController controller = player.AddComponent<PlayerController> ();
-		PhotonView view = AddViewForComponent (controller, PhotonNetwork.AllocateViewID ());
 
+		PhotonView view = AddViewForComponent (controller, PhotonNetwork.AllocateViewID ());
 		controller.Setup (owner, view);
+		
 		player.SetActive (true);
 		return player;
 	}
@@ -26,11 +28,34 @@ public class ObjectConstructor : MonoBehaviour {
 		AddRigidbody (turret, new RandomModuleRigidbodyInfo ());
 
 		TurretController controller = turret.AddComponent<TurretController> ();
-		PhotonView view = AddViewForComponent (controller, PhotonNetwork.AllocateViewID ());
 
+		PhotonView view = AddViewForComponent (controller, PhotonNetwork.AllocateViewID ());
 		controller.Setup (PhotonNetwork.player, view);
+		
 		turret.SetActive (true);
 		return turret;
+	}
+
+	public static GameObject ConstructModule (GameObject prefab, PhotonPlayer owner, Vector2 position, float rotation)
+	{
+		GameObject module = InstantiateModuleWithName (prefab, position, rotation, prefab.name);
+		module.SetActive (false);
+		AddRigidbody (module, new RandomModuleRigidbodyInfo ());
+
+		ISetup setupScript = prefab.GetComponent<ISetup> ();
+		if (setupScript == null)
+		{
+			Debug.LogErrorFormat ("Prefab module '{0}' does not have a setup script of type ISetup", prefab.name);
+			return null;
+		}
+
+		ModuleController controller = setupScript.AddController (module);
+
+		PhotonView view = AddViewForComponent (controller, PhotonNetwork.AllocateViewID ());
+		controller.Setup (owner, view);
+		
+		module.SetActive (true);
+		return module;
 	}
 
 	static GameObject InstantiateModuleWithName (GameObject prefab, Vector2 position, float rotation, string nameString)

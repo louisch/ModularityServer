@@ -6,11 +6,7 @@ using System.Collections;
 * It receives and applies input updates from client players
 * and broadcasts position updates to all clients.
 */
-public class PlayerController : MonoBehaviour {
-	// Object connection info
-	public PhotonPlayer owner;
-	public PhotonView view;
-	
+public class PlayerController : ModuleController, IController {
 	// Reference to object's rigid body
 	Rigidbody2D rb;
 
@@ -34,15 +30,10 @@ public class PlayerController : MonoBehaviour {
 		move = new PlayerMovement ();
 	}
 
-	public void Setup (PhotonPlayer owner, PhotonView view)
+	public override void Setup (PhotonPlayer owner, PhotonView view)
 	{
-
-		this.owner = owner;
-		this.view = view;
-
+		base.Setup (owner, view);
 		rb = GetComponent<Rigidbody2D> ();
-		previousRotation = rb.rotation;
-		previousPosition = rb.position;	
 	}
 
 	/**
@@ -74,61 +65,9 @@ public class PlayerController : MonoBehaviour {
 		this.torque = torque;
 	}
 
-	/**
-	* Serialises state changes for client.
-	* Currently, the whole state is sent, even if only part of the state changed.
-	*/
-	void OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
-	{
-		if (DetectChange () && stream.isWriting)
-		{
-			Vector2 pos = rb.position;
-			float rotation = rb.rotation;
-
-			stream.Serialize(ref pos);
-			stream.Serialize(ref rotation);
-		}
-		else if (!stream.isWriting)
-		{
-			Debug.LogError ("Server object is receiving positional info from client");
-		}
-	}
-
-	/**
-	* Checks if object's state has changed since last call.
-	* Updates the state tracking fields if it has.
-	*/
-	bool DetectChange ()
-	{
-		// sets update only if position or rotation has changed
-		bool update = previousPosition != rb.position || previousRotation != rb.rotation;
-		if (update)
-		{
-			// update state fields
-			previousPosition = rb.position;
-			previousRotation = rb.rotation;
-		}
-		return update;
-	}
-
-	void OnDestroy ()
+	protected override void OnDestroy ()
 	{
 		Debug.Log ("Player " + owner.ToString() + " despawned");
-		PhotonNetwork.RemoveRPCs (view);
-		PhotonNetwork.RemoveRPCs (owner);
-		PhotonNetwork.UnAllocateViewID (view.viewID);
-	}
-
-	void OnPhotonPlayerDisconnected (PhotonPlayer disconnected)
-	{
-		if (disconnected == owner)
-		{
-			Destroy (gameObject);
-		}
-	}
-
-	public void Disconnect ()
-	{
-		OnPhotonPlayerDisconnected (owner);
+		base.OnDestroy ();
 	}
 }

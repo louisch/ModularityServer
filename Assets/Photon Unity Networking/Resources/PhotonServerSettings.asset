@@ -35,4 +35,7 @@ MonoBehaviour:
   - FIRE
   - MouseUpdate
   - FireAllTurrets
+  - ToggleSelection
+  - Deselect
+  - Select
   DisableAutoOpenWizard: 0

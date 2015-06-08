@@ -46,16 +46,6 @@ public class ServerObjectManager : MonoBehaviour {
 		SampleMapForSpawnPoints ();
 	}
 
-	void SpawnTurret ()
-	{
-		Vector2 pos = spawnPoints[0];
-		spawnPoints.RemoveAt (0);
-		float rot = 0;
-		Debug.Log ("Spawning turret");
-		GameObject turret = ObjectConstructor.ConstructTurret (turretModel, PhotonNetwork.player, pos, rot);
-		modulesInGame.Add (turret);
-	}
-
 
 	/* Player connection/spawning. */
 	/**
@@ -67,7 +57,7 @@ public class ServerObjectManager : MonoBehaviour {
 		Debug.LogFormat ("Adding player {0} to spawn list", player.ToString ());
 		playersInLobby.Add (player);
 		playersSpawning = true;
-		SpawnTurret ();
+		modulesInGame.Add(SpawnModule (turretModel, PhotonNetwork.player));
 
 	}
 
@@ -106,6 +96,8 @@ public class ServerObjectManager : MonoBehaviour {
 	/* Spawns player in every client and in the server. */
 	bool SpawnPlayer (PhotonPlayer player)
 	{
+		SpawnAllInPlayer (player);
+		
 		Vector2 pos = spawnPoints[0];
 		spawnPoints.RemoveAt (0);
 		float rot = 0;
@@ -122,9 +114,26 @@ public class ServerObjectManager : MonoBehaviour {
 		}
 		view.RPC ("SpawnPlayer", player, player, controllerID, pos, rot);
 
-		SpawnAllInPlayer (player);
 		playersInGame.Add (playerModule);
 		return true;
+	}
+
+	GameObject SpawnModule (GameObject modulePrefab, PhotonPlayer owner)
+	{
+		Vector2 pos = spawnPoints[0];
+		spawnPoints.RemoveAt (0);
+		float rot = 0;
+
+		Debug.Log ("Spawning " + modulePrefab.name);
+		GameObject module = ObjectConstructor.ConstructModule (modulePrefab, owner, pos, rot);
+		int controllerID = module.GetComponent<ModuleController>().view.viewID;
+
+		foreach (GameObject inGame in playersInGame)
+		{
+			PhotonPlayer playerInGame = inGame.GetComponent<PlayerController> ().owner;
+			view.RPC ("SpawnModule", playerInGame, owner, controllerID, pos, rot);
+		}
+		return module;
 	}
 
 	/* Spawns all currently in-game objects in a player. */
@@ -145,7 +154,7 @@ public class ServerObjectManager : MonoBehaviour {
 
 			Vector2 pos = inGame.transform.position;
 			float rot = inGame.transform.rotation.eulerAngles.z;
-			view.RPC ("SpawnTurret", player, turret.owner, turret.view.viewID, pos, rot);
+			view.RPC ("SpawnModule", player, turret.owner, turret.view.viewID, pos, rot);
 
 		}
 
