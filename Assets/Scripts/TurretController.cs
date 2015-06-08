@@ -13,7 +13,7 @@ public class TurretController : MonoBehaviour {
 	{
 		this.owner = owner;
 		this.view = view;
-		turrets = GetComponentsInChildren<Turret> ();
+		turrets = GetComponentsInChildren<Turret> (true);
 	}
 
 	void FixedUpdate ()
@@ -51,6 +51,14 @@ public class TurretController : MonoBehaviour {
 			turret.FIRE ();
 		}
 		view.RPC ("OpenFire", PhotonTargets.Others);
+	}
+
+	[RPC]
+	void ToggleSelection (PhotonMessageInfo info)
+	{
+		Debug.Log ("Selection request received.");
+		owner = info.sender;
+		view.RPC ("ChangeOwnership", PhotonTargets.Others, owner);
 	}
 
 

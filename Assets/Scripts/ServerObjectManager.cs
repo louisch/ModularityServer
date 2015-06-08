@@ -46,6 +46,16 @@ public class ServerObjectManager : MonoBehaviour {
 		SampleMapForSpawnPoints ();
 	}
 
+	void SpawnTurret ()
+	{
+		Vector2 pos = spawnPoints[0];
+		spawnPoints.RemoveAt (0);
+		float rot = 0;
+		Debug.Log ("Spawning turret");
+		GameObject turret = ObjectConstructor.ConstructTurret (turretModel, PhotonNetwork.player, pos, rot);
+		modulesInGame.Add (turret);
+	}
+
 
 	/* Player connection/spawning. */
 	/**
@@ -57,6 +67,8 @@ public class ServerObjectManager : MonoBehaviour {
 		Debug.LogFormat ("Adding player {0} to spawn list", player.ToString ());
 		playersInLobby.Add (player);
 		playersSpawning = true;
+		SpawnTurret ();
+
 	}
 
 	/**
@@ -94,10 +106,8 @@ public class ServerObjectManager : MonoBehaviour {
 	/* Spawns player in every client and in the server. */
 	bool SpawnPlayer (PhotonPlayer player)
 	{
-		int i = Random.Range (0, spawnPoints.Count);
-		Debug.Log (i);
-		Vector2 pos = spawnPoints[i];
-		spawnPoints.RemoveAt (i);
+		Vector2 pos = spawnPoints[0];
+		spawnPoints.RemoveAt (0);
 		float rot = 0;
 
 		GameObject playerModule = ObjectConstructor.ConstructPlayer (playerModel, player, pos, rot);
@@ -128,6 +138,15 @@ public class ServerObjectManager : MonoBehaviour {
 			Vector2 pos = inGame.transform.position;
 			float rot = inGame.transform.rotation.eulerAngles.z;
 			view.RPC ("SpawnPlayer", player, playerInGame.owner, playerInGame.view.viewID, pos, rot);
+		}
+		foreach (GameObject inGame in modulesInGame)
+		{
+			TurretController turret = inGame.GetComponent<TurretController> ();
+
+			Vector2 pos = inGame.transform.position;
+			float rot = inGame.transform.rotation.eulerAngles.z;
+			view.RPC ("SpawnTurret", player, turret.owner, turret.view.viewID, pos, rot);
+
 		}
 
 		return true;

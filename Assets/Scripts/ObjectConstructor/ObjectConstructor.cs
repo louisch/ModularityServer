@@ -19,7 +19,7 @@ public class ObjectConstructor : MonoBehaviour {
 		return player;
 	}
 
-	public static GameObject ConstructTurret (GameObject prefab, Vector2 position, float rotation)
+	public static GameObject ConstructTurret (GameObject prefab, PhotonPlayer owner, Vector2 position, float rotation)
 	{
 		GameObject turret = InstantiateModuleWithName (prefab, position, rotation, prefab.name);
 		turret.SetActive (false);
