@@ -97,7 +97,7 @@ public class ServerObjectManager : MonoBehaviour {
 	bool SpawnPlayer (PhotonPlayer player)
 	{
 		SpawnAllInPlayer (player);
-		
+
 		Vector2 pos = spawnPoints[0];
 		spawnPoints.RemoveAt (0);
 		float rot = 0;
@@ -131,7 +131,7 @@ public class ServerObjectManager : MonoBehaviour {
 		foreach (GameObject inGame in playersInGame)
 		{
 			PhotonPlayer playerInGame = inGame.GetComponent<PlayerController> ().owner;
-			view.RPC ("SpawnModule", playerInGame, owner, controllerID, pos, rot);
+			view.RPC ("SpawnModule", playerInGame, "Shared/Prefabs/Turrets/TurretBase4x1", owner, controllerID, pos, rot);
 		}
 		return module;
 	}
@@ -154,7 +154,7 @@ public class ServerObjectManager : MonoBehaviour {
 
 			Vector2 pos = inGame.transform.position;
 			float rot = inGame.transform.rotation.eulerAngles.z;
-			view.RPC ("SpawnModule", player, turret.owner, turret.view.viewID, pos, rot);
+			view.RPC ("SpawnModule", player, "Shared/Prefabs/Turrets/TurretBase4x1", turret.owner, turret.view.viewID, pos, rot);
 
 		}
 
