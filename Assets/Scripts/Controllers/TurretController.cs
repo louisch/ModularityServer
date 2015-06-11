@@ -24,13 +24,6 @@ public class TurretController : ModuleController {
 				turret.Rotate ();
 			}
 		}
-		else
-		{
-			foreach (Turret turret in turrets)
-			{
-				turret.IdleRotate ();
-			}	
-		}
 	}
 
 	[RPC]
@@ -66,6 +59,10 @@ public class TurretController : ModuleController {
 		if (owner.isLocal)
 		{
 			owner = info.sender;
+			foreach (Turret turret in turrets)
+			{
+				turret.owned = true;
+			}
 			view.RPC ("ChangeOwnership", PhotonTargets.Others, owner);
 		}
 		else if (owner != info.sender)
@@ -91,10 +88,16 @@ public class TurretController : ModuleController {
 	{
 		if (stream.isWriting)
 		{
-			foreach (Turret turret in turrets)
+			bool controlled = !owner.isMasterClient;
+			stream.SendNext (controlled);
+			if (controlled)
 			{
-				float rotation = turret.transform.rotation.eulerAngles.z;
-				stream.SendNext (rotation);
+				Debug.Log ("Sending");
+				foreach (Turret turret in turrets)
+				{
+					float rotation = turret.transform.rotation.eulerAngles.z;
+					stream.SendNext (rotation);
+				}
 			}
 		}
 		base.OnPhotonSerializeView(stream, info);
@@ -106,6 +109,10 @@ public class TurretController : ModuleController {
 		{
 			Debug.Log ("Resetting turret ownership");
 			owner = PhotonNetwork.player;
+			foreach (Turret turret in turrets)
+			{
+				turret.owned = false;
+			}
 			view.RPC ("ChangeOwnership", PhotonTargets.Others, owner);
 		}
 	}
