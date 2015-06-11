@@ -16,11 +16,12 @@ public class ServerObjectManager : MonoBehaviour {
 	bool playersSpawning = false;
 
 	public PrefabTracker prefabTracker;
-	public GameObject defaultPrefab;
 
 	// Keeps track of spawned players
-	ICollection<GameObject> playersInGame = new List<GameObject> ();
-	ICollection<GameObject> modulesInGame = new List<GameObject> ();
+	ICollection<PhotonPlayer> playersInGame = new List<PhotonPlayer> ();
+
+	// Keeps track of spawned objects
+	Dictionary<GameObject, string> inGameModules = new Dictionary<GameObject, string>();
 
 	public Vector2 mapSize;
 	public int samples;
@@ -78,14 +79,14 @@ public class ServerObjectManager : MonoBehaviour {
 			if (spawn == info.sender)
 			{
 				Debug.Log ("Found requestee in pending spawns list");
-				SpawnAllInPlayer (info.sender);
+				playersInGame.Add (spawn);
 				
 				GameObject playerPrefab;
 				string prefabPath;
-				GetPlayerModel (out playerPrefab, out prefabPath);
-				GameObject player = SpawnModule (spawn, playerPrefab, prefabPath);
+				prefabTracker.GetRandomPlayerModel (out playerPrefab, out prefabPath);
 
-				playersInGame.Add (player);
+				SpawnModule (spawn, playerPrefab, prefabPath);
+				SpawnAllInPlayer (spawn);
 				break;
 			}
 		}
@@ -98,25 +99,6 @@ public class ServerObjectManager : MonoBehaviour {
 		}
 	}
 
-	void GetPlayerModel (out GameObject playerPrefab, out string prefabPath)
-	{
-		string[] players = prefabTracker.players.ToArray();
-		prefabPath = players[Random.Range(0,players.Length)];
-		playerPrefab = GetModulePrefabFromPath(prefabPath);
-		Debug.Log (prefabPath);
-	}
-
-	GameObject GetModulePrefabFromPath (string path)
-	{
-		GameObject modulePrefab = Resources.Load<GameObject> (path);
-		if (modulePrefab == null)
-		{
-			Debug.LogWarningFormat ("Could not load asset at path '{0}'. Loading default asset instead.", path);
-			modulePrefab = defaultPrefab;
-		}
-		return modulePrefab;
-	}
-
 	GameObject SpawnModule (PhotonPlayer owner, GameObject prefab, string prefabPath)
 	{
 		Vector2 pos = spawnPoints[0];
@@ -126,44 +108,28 @@ public class ServerObjectManager : MonoBehaviour {
 		Debug.Log ("Spawning " + prefab.name + " for " + owner.ToString());
 		
 		GameObject module = ObjectConstructor.ConstructModule (prefab, owner, pos, rot);
+		inGameModules.Add (module, prefabPath);
 		int controllerID = module.GetComponent<ModuleController>().view.viewID;
 
-		foreach (GameObject inGame in playersInGame)
+		foreach (PhotonPlayer player in playersInGame)
 		{
-			PhotonPlayer playerInGame = inGame.GetComponent<PlayerController> ().owner;
-			view.RPC ("SpawnModule", playerInGame, prefabPath, owner, controllerID, pos, rot);
-		}
-		if (!owner.isLocal)
-		{
-			view.RPC ("SpawnModule", owner, prefabPath, owner, controllerID, pos, rot);
+			view.RPC ("SpawnModule", player, prefabPath, owner, controllerID, pos, rot);
 		}
 
 		return module;
 	}
 
 	/* Spawns all currently in-game objects in a player. */
-	bool SpawnAllInPlayer (PhotonPlayer player)
+	void SpawnAllInPlayer (PhotonPlayer player)
 	{
 		// Spawn all players already in game in the connecting player.
-		foreach (GameObject inGame in playersInGame)
+		foreach (KeyValuePair<GameObject,string> inGame in inGameModules)
 		{
-			PlayerController playerInGame = inGame.GetComponent<PlayerController> ();
-
-			Vector2 pos = inGame.transform.position;
-			float rot = inGame.transform.rotation.eulerAngles.z;
-			view.RPC ("SpawnModule", player, playerInGame.owner, playerInGame.view.viewID, pos, rot);
+			ModuleController controller = inGame.Key.GetComponent<ModuleController> ();
+			Vector2 pos = inGame.Key.transform.position;
+			float rot = inGame.Key.transform.rotation.eulerAngles.z;
+			view.RPC ("SpawnModule", player, inGame.Value, controller.owner, controller.view.viewID, pos, rot);
 		}
-		foreach (GameObject inGame in modulesInGame)
-		{
-			TurretController turret = inGame.GetComponent<TurretController> ();
-
-			Vector2 pos = inGame.transform.position;
-			float rot = inGame.transform.rotation.eulerAngles.z;
-			view.RPC ("SpawnModule", player, "Shared/Prefabs/Turrets/TurretBase4x1", turret.owner, turret.view.viewID, pos, rot);
-
-		}
-
-		return true;
 	}
 
 
@@ -176,15 +142,15 @@ public class ServerObjectManager : MonoBehaviour {
 	{
 		Debug.Log ("Player " + disconnected.ToString () + " disconnected.");
 
-		RemovePlayerFromLobby (disconnected);
-		RemovePlayerFromGame (disconnected);
+		RemovePlayerFromList (disconnected, playersInLobby);
+		RemovePlayerFromList (disconnected, playersInGame);
 	}
 
-	/* Removes player from the lobby list and clears their RPC list. */
-	bool RemovePlayerFromLobby (PhotonPlayer player)
+	/* Removes player from given list and clears their RPC list. */
+	bool RemovePlayerFromList (PhotonPlayer player, IEnumerable<PhotonPlayer> playerList)
 	{
 		bool found = false;
-		foreach (PhotonPlayer lobbyPlayer in playersInLobby)
+		foreach (PhotonPlayer lobbyPlayer in playerList)
 		{
 			if (player == lobbyPlayer)
 			{
@@ -198,25 +164,5 @@ public class ServerObjectManager : MonoBehaviour {
 			playersInLobby.Remove (player);
 		}
 		return found;
-	}
-
-	/* Removes player from game and clears all associated RPCs. */
-	bool RemovePlayerFromGame (PhotonPlayer player)
-	{
-		PlayerController found = null;
-		foreach (GameObject inGame in playersInGame)
-		{
-			if (inGame.GetComponent<PlayerController>().owner == player)
-			{
-				found = inGame.GetComponent<PlayerController>();
-			}
-		}
-
-		if (found != null)
-		{
-			found.Disconnect ();
-			playersInGame.Remove (found.gameObject);
-		}
-		return found != null;
 	}
 }

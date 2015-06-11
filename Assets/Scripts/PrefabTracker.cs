@@ -12,10 +12,12 @@ public class PrefabTracker : MonoBehaviour {
 	public Dictionary<string, GameObject> loadedProjectiles = new Dictionary<string, GameObject>();
 
 	public List<string> modules = new List<string>();
-	public Dictionary<string, GameObject> loadedGenericModules = new Dictionary<string, GameObject>();
+	public Dictionary<string, GameObject> loadedModules = new Dictionary<string, GameObject>();
 
 	public string playersPath = "Players";
 	public string projectilesPath = "Projectiles";
+
+	public GameObject defaultPrefab;
 
 	bool loading = true;
 
@@ -68,5 +70,39 @@ public class PrefabTracker : MonoBehaviour {
 		Debug.Log (players[0] + " " + players[0].Length);
 		Debug.Log("Found projectiles: " + projectiles.Count);
 		Debug.Log("Found generic modules: " + modules.Count);
+	}
+
+	public void GetRandomPlayerModel (out GameObject playerPrefab, out string prefabPath)
+	{
+		prefabPath = players[Random.Range(0,players.Count)];
+		playerPrefab = GetAsset(prefabPath, loadedPlayerModules);
+		Debug.Log ("Got player model at path: " + prefabPath);
+	}
+
+	public GameObject GetModule (string path)
+	{
+		return GetAsset(path, loadedModules);
+	}
+
+	public GameObject GetAsset (string path, Dictionary<string,GameObject> loadedModules)
+	{
+
+		GameObject modulePrefab;
+		if (!loadedModules.TryGetValue(path, out modulePrefab))
+		{
+			modulePrefab = Resources.Load<GameObject> (path);
+			if (modulePrefab == null)
+			{
+				Debug.LogWarningFormat ("Could not load asset at path '{0}'. Loading default asset instead.", path);
+				modulePrefab = defaultPrefab;
+			}
+			loadedModules.Add(path,modulePrefab);
+		}
+		else
+		{
+			Debug.Log ("Loaded module!");
+		}
+
+		return modulePrefab;
 	}
 }
