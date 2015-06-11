@@ -1,53 +1,56 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &106570
+--- !u!1 &131878
 GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 4
   m_Component:
-  - 4: {fileID: 453410}
-  - 114: {fileID: 11431608}
-  - 114: {fileID: 11421756}
-  - 114: {fileID: 11431640}
-  - 114: {fileID: 11411244}
+  - 4: {fileID: 464280}
+  - 114: {fileID: 11433978}
+  - 114: {fileID: 11412988}
+  - 114: {fileID: 11404588}
   m_Layer: 0
-  m_Name: ServerGameManager
+  m_Name: ServerConnectionManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &453410
+--- !u!4 &464280
 Transform:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 106570}
+  m_GameObject: {fileID: 131878}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!114 &11411244
+--- !u!114 &11404588
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 106570}
+  m_GameObject: {fileID: 131878}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 328a056ca55d7184d9b1e984e06504d6, type: 3}
+  m_Script: {fileID: 11500000, guid: 3612deebffbb2994f979da81e5959ebe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &11421756
+  prefabTracker: {fileID: 0}
+  defaultPrefab: {fileID: 150780, guid: 0289d757ad14ab543818087d6fa22171, type: 2}
+  mapSize: {x: 20, y: 20}
+  samples: 1000
+--- !u!114 &11412988
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 106570}
+  m_GameObject: {fileID: 131878}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6e8461a9b3444a1489ec2d78d224bc0c, type: 3}
@@ -56,12 +59,12 @@ MonoBehaviour:
   gameVersion: v0.1dev
   roomName: The Room
   buttonSizeMultiplier: .100000001
---- !u!114 &11431608
+--- !u!114 &11433978
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 106570}
+  m_GameObject: {fileID: 131878}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
@@ -81,21 +84,6 @@ MonoBehaviour:
   viewIdField: 0
   instantiationId: -1
   isRuntimeInstantiated: 0
---- !u!114 &11431640
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 106570}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3612deebffbb2994f979da81e5959ebe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerModel: {fileID: 104844, guid: 50e3ea67e4bedfb44bdd7aed794cee69, type: 2}
-  turretModel: {fileID: 188618, guid: e61eb2b0f8f1d1149969f2cbe64ca5b4, type: 2}
-  mapSize: {x: 20, y: 20}
-  samples: 1000
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
@@ -105,5 +93,5 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 106570}
+  m_RootGameObject: {fileID: 131878}
   m_IsPrefabParent: 1

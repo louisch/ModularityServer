@@ -15,8 +15,8 @@ public class ServerObjectManager : MonoBehaviour {
 	// true if server is currently accepting spawn requests
 	bool playersSpawning = false;
 
-	public GameObject playerModel;
-	public GameObject turretModel;
+	public PrefabTracker prefabTracker;
+	public GameObject defaultPrefab;
 
 	// Keeps track of spawned players
 	ICollection<GameObject> playersInGame = new List<GameObject> ();
@@ -57,8 +57,6 @@ public class ServerObjectManager : MonoBehaviour {
 		Debug.LogFormat ("Adding player {0} to spawn list", player.ToString ());
 		playersInLobby.Add (player);
 		playersSpawning = true;
-		modulesInGame.Add(SpawnModule (turretModel, PhotonNetwork.player));
-
 	}
 
 	/**
@@ -80,7 +78,14 @@ public class ServerObjectManager : MonoBehaviour {
 			if (spawn == info.sender)
 			{
 				Debug.Log ("Found requestee in pending spawns list");
-				SpawnPlayer (info.sender);
+				SpawnAllInPlayer (info.sender);
+				
+				GameObject playerPrefab;
+				string prefabPath;
+				GetPlayerModel (out playerPrefab, out prefabPath);
+				GameObject player = SpawnModule (spawn, playerPrefab, prefabPath);
+
+				playersInGame.Add (player);
 				break;
 			}
 		}
@@ -93,46 +98,46 @@ public class ServerObjectManager : MonoBehaviour {
 		}
 	}
 
-	/* Spawns player in every client and in the server. */
-	bool SpawnPlayer (PhotonPlayer player)
+	void GetPlayerModel (out GameObject playerPrefab, out string prefabPath)
 	{
-		SpawnAllInPlayer (player);
-
-		Vector2 pos = spawnPoints[0];
-		spawnPoints.RemoveAt (0);
-		float rot = 0;
-
-		GameObject playerModule = ObjectConstructor.ConstructPlayer (playerModel, player, pos, rot);
-		int controllerID = playerModule.GetComponent<PlayerController>().view.viewID;
-
-		Debug.LogFormat ("Spawning player {0} with id {1}", player.ToString (), controllerID);
-
-		foreach (GameObject inGame in playersInGame)
-		{
-			PhotonPlayer playerInGame = inGame.GetComponent<PlayerController> ().owner;
-			view.RPC ("SpawnPlayer", playerInGame, player, controllerID, pos, rot);
-		}
-		view.RPC ("SpawnPlayer", player, player, controllerID, pos, rot);
-
-		playersInGame.Add (playerModule);
-		return true;
+		string[] players = prefabTracker.players.ToArray();
+		prefabPath = players[Random.Range(0,players.Length)];
+		playerPrefab = GetModulePrefabFromPath(prefabPath);
+		Debug.Log (prefabPath);
 	}
 
-	GameObject SpawnModule (GameObject modulePrefab, PhotonPlayer owner)
+	GameObject GetModulePrefabFromPath (string path)
+	{
+		GameObject modulePrefab = Resources.Load<GameObject> (path);
+		if (modulePrefab == null)
+		{
+			Debug.LogWarningFormat ("Could not load asset at path '{0}'. Loading default asset instead.", path);
+			modulePrefab = defaultPrefab;
+		}
+		return modulePrefab;
+	}
+
+	GameObject SpawnModule (PhotonPlayer owner, GameObject prefab, string prefabPath)
 	{
 		Vector2 pos = spawnPoints[0];
 		spawnPoints.RemoveAt (0);
 		float rot = 0;
 
-		Debug.Log ("Spawning " + modulePrefab.name);
-		GameObject module = ObjectConstructor.ConstructModule (modulePrefab, owner, pos, rot);
+		Debug.Log ("Spawning " + prefab.name + " for " + owner.ToString());
+		
+		GameObject module = ObjectConstructor.ConstructModule (prefab, owner, pos, rot);
 		int controllerID = module.GetComponent<ModuleController>().view.viewID;
 
 		foreach (GameObject inGame in playersInGame)
 		{
 			PhotonPlayer playerInGame = inGame.GetComponent<PlayerController> ().owner;
-			view.RPC ("SpawnModule", playerInGame, "Shared/Prefabs/Turrets/TurretBase4x1", owner, controllerID, pos, rot);
+			view.RPC ("SpawnModule", playerInGame, prefabPath, owner, controllerID, pos, rot);
 		}
+		if (!owner.isLocal)
+		{
+			view.RPC ("SpawnModule", owner, prefabPath, owner, controllerID, pos, rot);
+		}
+
 		return module;
 	}
 
@@ -146,7 +151,7 @@ public class ServerObjectManager : MonoBehaviour {
 
 			Vector2 pos = inGame.transform.position;
 			float rot = inGame.transform.rotation.eulerAngles.z;
-			view.RPC ("SpawnPlayer", player, playerInGame.owner, playerInGame.view.viewID, pos, rot);
+			view.RPC ("SpawnModule", player, playerInGame.owner, playerInGame.view.viewID, pos, rot);
 		}
 		foreach (GameObject inGame in modulesInGame)
 		{
