@@ -93,7 +93,7 @@ public class TurretController : ModuleController {
 		{
 			foreach (Turret turret in turrets)
 			{
-				Quaternion rotation = turret.transform.rotation;
+				float rotation = turret.transform.rotation.eulerAngles.z;
 				stream.SendNext (rotation);
 			}
 		}

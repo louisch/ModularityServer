@@ -79,6 +79,13 @@ public class PrefabTracker : MonoBehaviour {
 		Debug.Log ("Got player model at path: " + prefabPath);
 	}
 
+	public void GetRandomModel (out GameObject playerPrefab, out string prefabPath)
+	{
+		prefabPath = modules[Random.Range(0,modules.Count)];
+		playerPrefab = GetAsset(prefabPath, loadedModules);
+		Debug.Log ("Got player model at path: " + prefabPath);
+	}
+
 	public GameObject GetModule (string path)
 	{
 		return GetAsset(path, loadedModules);

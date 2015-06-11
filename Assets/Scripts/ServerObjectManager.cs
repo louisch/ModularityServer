@@ -186,4 +186,15 @@ public class ServerObjectManager : MonoBehaviour {
 	{
 		return inGameModules.Remove(inGame);
 	}
+
+	void OnGUI ()
+	{
+        if(GUI.Button(new Rect(120, 120, 120, 120), "SpawnTurret"))
+		{
+			GameObject playerPrefab;
+			string prefabPath;
+			prefabTracker.GetRandomModel (out playerPrefab, out prefabPath);
+			SpawnModule (PhotonNetwork.player, playerPrefab, prefabPath);
+		}
+	}
 }
