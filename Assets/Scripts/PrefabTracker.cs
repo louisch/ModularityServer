@@ -69,12 +69,4 @@ public class PrefabTracker : MonoBehaviour {
 		Debug.Log("Found projectiles: " + projectiles.Count);
 		Debug.Log("Found generic modules: " + modules.Count);
 	}
-
-	string Trim (string str)
-	{
-		int i = str.Length-1;
-		while (!(char.IsNumber(str[i]) && char.IsLetter(str[i])))
-			i--;
-		return str.Substring(0, i+1);
-	}
 }
