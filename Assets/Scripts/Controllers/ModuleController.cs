@@ -68,6 +68,7 @@ public class ModuleController : MonoBehaviour, IController {
 	{
 		if (disconnected == owner)
 		{
+			ServerObjectManager.RemoveObjectFromGame(gameObject);
 			Destroy (gameObject);
 		}
 	}

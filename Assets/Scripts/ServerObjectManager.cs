@@ -18,14 +18,16 @@ public class ServerObjectManager : MonoBehaviour {
 	public PrefabTracker prefabTracker;
 
 	// Keeps track of spawned players
-	ICollection<PhotonPlayer> playersInGame = new List<PhotonPlayer> ();
+	static ICollection<PhotonPlayer> playersInGame = new List<PhotonPlayer> ();
 
 	// Keeps track of spawned objects
-	Dictionary<GameObject, string> inGameModules = new Dictionary<GameObject, string>();
+	static Dictionary<GameObject, string> inGameModules = new Dictionary<GameObject, string>();
 
 	public Vector2 mapSize;
 	public int samples;
 	List<Vector2> spawnPoints = new List<Vector2> ();
+
+	bool spawningInPlayer = false;
 
 
 	Vector2 UniformSampleMap ()
@@ -68,30 +70,45 @@ public class ServerObjectManager : MonoBehaviour {
 	[RPC]
 	void RequestSpawn (PhotonMessageInfo info)
 	{
+		StartCoroutine(SpawnPlayer(info.sender));
+	}
+
+	IEnumerator SpawnPlayer (PhotonPlayer player)
+	{
 		if (!playersSpawning)
 		{
 			Debug.Log ("Invalid spawn request: not currently spawning.");
-			return;
+			return false;
 		}
 		foreach (PhotonPlayer spawn in playersInLobby)
 		{
 			Debug.Log ("Checking spawn " + spawn.ToString ());
-			if (spawn == info.sender)
+			if (spawn == player)
 			{
+				while (spawningInPlayer)
+				{
+					yield return spawningInPlayer;
+				}
+				// prevent interference from other spawns
+				spawningInPlayer = true;
+
+				// yield while the process is spawning objects in anoter player
 				Debug.Log ("Found requestee in pending spawns list");
-				playersInGame.Add (spawn);
+				yield return StartCoroutine(SpawnAllInPlayer (spawn));
 				
 				GameObject playerPrefab;
 				string prefabPath;
 				prefabTracker.GetRandomPlayerModel (out playerPrefab, out prefabPath);
 
+				playersInGame.Add (spawn);
 				SpawnModule (spawn, playerPrefab, prefabPath);
-				SpawnAllInPlayer (spawn);
+				// re-enable other spawns
+				spawningInPlayer = false;
 				break;
 			}
 		}
 
-		playersInLobby.Remove (info.sender);
+		RemovePlayerFromList (player, playersInLobby);
 		if (playersInLobby.Count == 0)
 		{
 			Debug.Log ("Done spawning!");
@@ -99,7 +116,7 @@ public class ServerObjectManager : MonoBehaviour {
 		}
 	}
 
-	GameObject SpawnModule (PhotonPlayer owner, GameObject prefab, string prefabPath)
+	void SpawnModule (PhotonPlayer owner, GameObject prefab, string prefabPath)
 	{
 		Vector2 pos = spawnPoints[0];
 		spawnPoints.RemoveAt (0);
@@ -115,12 +132,10 @@ public class ServerObjectManager : MonoBehaviour {
 		{
 			view.RPC ("SpawnModule", player, prefabPath, owner, controllerID, pos, rot);
 		}
-
-		return module;
 	}
 
 	/* Spawns all currently in-game objects in a player. */
-	void SpawnAllInPlayer (PhotonPlayer player)
+	IEnumerator SpawnAllInPlayer (PhotonPlayer player)
 	{
 		// Spawn all players already in game in the connecting player.
 		foreach (KeyValuePair<GameObject,string> inGame in inGameModules)
@@ -129,6 +144,7 @@ public class ServerObjectManager : MonoBehaviour {
 			Vector2 pos = inGame.Key.transform.position;
 			float rot = inGame.Key.transform.rotation.eulerAngles.z;
 			view.RPC ("SpawnModule", player, inGame.Value, controller.owner, controller.view.viewID, pos, rot);
+			yield return true;
 		}
 	}
 
@@ -147,7 +163,7 @@ public class ServerObjectManager : MonoBehaviour {
 	}
 
 	/* Removes player from given list and clears their RPC list. */
-	bool RemovePlayerFromList (PhotonPlayer player, IEnumerable<PhotonPlayer> playerList)
+	public static bool RemovePlayerFromList (PhotonPlayer player, ICollection<PhotonPlayer> playerList)
 	{
 		bool found = false;
 		foreach (PhotonPlayer lobbyPlayer in playerList)
@@ -161,8 +177,13 @@ public class ServerObjectManager : MonoBehaviour {
 		}
 		if (found)
 		{
-			playersInLobby.Remove (player);
+			playerList.Remove (player);
 		}
 		return found;
+	}
+
+	public static bool RemoveObjectFromGame (GameObject inGame)
+	{
+		return inGameModules.Remove(inGame);
 	}
 }
