@@ -5,6 +5,7 @@ public class Turret : MonoBehaviour {
 	public Barrel[] barrels;
 	public float turningSpeed;
 	public bool owned = false;
+	public float range = 6;
 
 	public Quaternion rotateTo;
 
