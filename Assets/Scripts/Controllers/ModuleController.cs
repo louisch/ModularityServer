@@ -81,6 +81,7 @@ public class ModuleController : MonoBehaviour, IController {
 	{
 		if (info.sender == this.info.owner)
 		{
+			Debug.Log ("Got detach request");
 			this.info.owner = PhotonNetwork.player;
 			UpdateOwnership ();
 		}
@@ -91,6 +92,7 @@ public class ModuleController : MonoBehaviour, IController {
 	{
 		if (this.info.owner.isLocal)
 		{
+			Debug.Log ("Got attach request");
 			this.info.owner = info.sender;
 			UpdateOwnership ();
 		}
@@ -98,8 +100,7 @@ public class ModuleController : MonoBehaviour, IController {
 
 	protected void UpdateOwnership ()
 	{
-		Debug.Log ("Sending ownership change");
-			info.view.RPC ("ChangeOwner", PhotonTargets.Others, this.info.owner);
+		info.view.RPC ("ChangeOwner", PhotonTargets.Others, this.info.owner);
 	}
 
 	public void Disconnect ()
