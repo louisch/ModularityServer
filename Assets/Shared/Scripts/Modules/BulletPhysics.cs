@@ -6,6 +6,7 @@ public class BulletPhysics : MonoBehaviour {
 	public PhotonPlayer owner;
 	public float speed = 25;
 	public float range = 10;
+	public float damage = 5;
 
 	public Rigidbody2D rb;
 
@@ -26,10 +27,11 @@ public class BulletPhysics : MonoBehaviour {
 	void OnTriggerEnter2D (Collider2D other)
 	{
 		Debug.Log ("Triggered by " + other.gameObject.name);
-		ModuleController controller = other.gameObject.GetComponent<ModuleController>();
-		if (controller != null && controller.info.owner != owner)
+		ModuleInfo info = other.gameObject.GetComponent<ModuleInfo>();
+		if (info != null && info.owner != owner)
 		{
 			Destroy (gameObject);
+			info.TakeDamage (damage);
 		}
 	}
 
