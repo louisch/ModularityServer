@@ -24,15 +24,11 @@ public class PlayerController : ModuleController, IController {
 	* Runs setup on newly created player object.
 	* (self-documenting)
 	*/
-	void Awake ()
+	protected override void Awake ()
 	{
+		base.Awake();
 		Debug.Log ("Player created");
 		move = new PlayerMovement ();
-	}
-
-	public override void Setup (PhotonPlayer owner, PhotonView view)
-	{
-		base.Setup (owner, view);
 		rb = GetComponent<Rigidbody2D> ();
 	}
 
@@ -53,11 +49,11 @@ public class PlayerController : ModuleController, IController {
 	[RPC]
 	public void UpdateInput (float strafe, float thrust, float torque, PhotonMessageInfo info)
 	{
-		if (info.sender != owner)
+		if (info.sender != this.info.owner)
 		{
 			Debug.LogWarningFormat ("Illegal UpdateInput attempt: player {0} attempted to move player {1}",
 									info.sender.ToString (),
-									owner.ToString ());
+									this.info.owner.ToString ());
 			return;
 		}
 		this.strafe = strafe;
@@ -67,7 +63,7 @@ public class PlayerController : ModuleController, IController {
 
 	protected override void OnDestroy ()
 	{
-		Debug.Log ("Player " + owner.ToString() + " despawned");
+		Debug.Log ("Player " + info.owner.ToString() + " despawned");
 		base.OnDestroy ();
 	}
 }

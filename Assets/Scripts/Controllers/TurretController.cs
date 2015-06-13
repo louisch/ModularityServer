@@ -6,15 +6,14 @@ public class TurretController : ModuleController {
 
 	Vector2 mouse;
 
-	public override void Setup (PhotonPlayer owner, PhotonView view)
+	protected override void OnEnable ()
 	{
-		base.Setup (owner, view);
 		turrets = GetComponentsInChildren<Turret> (true);
 	}
 
 	void FixedUpdate ()
 	{
-		if (!owner.isLocal)
+		if (!this.info.owner.isLocal)
 		{
 			foreach (Turret turret in turrets)
 			{
@@ -29,9 +28,9 @@ public class TurretController : ModuleController {
 	[RPC]
 	void MouseUpdate (Vector2 mouse, PhotonMessageInfo info)
 	{
-		if (info.sender != owner)
+		if (info.sender != this.info.owner)
 		{
-			Debug.LogFormat ("Player {0} is attempting to control object belonging to player {1}", info.sender.ToString(), owner.ToString());
+			Debug.LogFormat ("Player {0} is attempting to control object belonging to player {1}", info.sender.ToString(), this.info.owner.ToString());
 			return;
 		}
 		this.mouse = mouse;
@@ -40,55 +39,23 @@ public class TurretController : ModuleController {
 	[RPC]
 	void FireAllTurrets (PhotonMessageInfo info)
 	{
-		if (info.sender != owner)
+		if (info.sender != this.info.owner)
 		{
-			Debug.LogWarningFormat ("Player {0} is attempting to control object belonging to player {1}", info.sender.ToString(), owner.ToString());
+			Debug.LogWarningFormat ("Player {0} is attempting to control object belonging to player {1}", info.sender.ToString(), this.info.owner.ToString());
 			return;
 		}
 		foreach (Turret turret in turrets)
 		{
 			turret.FIRE ();
 		}
-		view.RPC ("OpenFire", PhotonTargets.Others);
+		this.info.view.RPC ("OpenFire", PhotonTargets.Others);
 	}
-
-	[RPC]
-	void Select (PhotonMessageInfo info)
-	{
-		Debug.Log ("Selection request received for " + gameObject.name);
-		if (owner.isLocal)
-		{
-			owner = info.sender;
-			foreach (Turret turret in turrets)
-			{
-				turret.owned = true;
-			}
-			view.RPC ("ChangeOwnership", PhotonTargets.Others, owner);
-		}
-		else if (owner != info.sender)
-		{
-			Debug.LogWarningFormat ("Player {0} is attempting to take control of player {1}'s module", info.sender.ToString(), owner.ToString());
-			return;
-		}
-	}
-
-	[RPC]
-	void Deselect (PhotonMessageInfo info)
-	{
-		Debug.Log ("deselection request received for " + gameObject.name);
-		if (owner == info.sender)
-		{
-			OnPhotonPlayerDisconnected (info.sender);
-			return;
-		}
-	}
-
 
 	protected override void OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
 	{
 		if (stream.isWriting)
 		{
-			bool controlled = !owner.isMasterClient;
+			bool controlled = !this.info.owner.isMasterClient;
 			stream.SendNext (controlled);
 			if (controlled)
 			{
@@ -105,15 +72,11 @@ public class TurretController : ModuleController {
 
 	protected override void OnPhotonPlayerDisconnected (PhotonPlayer disconnected)
 	{
-		if (disconnected == owner)
+		if (disconnected == this.info.owner)
 		{
 			Debug.Log ("Resetting turret ownership");
-			owner = PhotonNetwork.player;
-			foreach (Turret turret in turrets)
-			{
-				turret.owned = false;
-			}
-			view.RPC ("ChangeOwnership", PhotonTargets.Others, owner);
+			this.info.owner = PhotonNetwork.player;
+			this.info.view.RPC ("ChangeOwnership", PhotonTargets.Others, this.info.owner);
 		}
 	}
 }

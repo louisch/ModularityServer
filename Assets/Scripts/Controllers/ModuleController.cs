@@ -2,23 +2,26 @@
 using System.Collections;
 
 public class ModuleController : MonoBehaviour, IController {
-	// Object connection info
-	public PhotonPlayer owner;
-	public PhotonView view;
+	public ModuleInfo info;
 
 	// Fields used to determine whether the state of an object changed since the previous call to FixedUpdate
 	Vector2 previousPosition;
 	float previousRotation;
 
-
-	public virtual void Setup (PhotonPlayer owner, PhotonView view)
+	protected virtual void Awake ()
 	{
+		Debug.Log ("Fetching module info");
+		info = GetComponent<ModuleInfo> ();
+		if (info == null)
+		{
+			Debug.LogWarning ("Could not find module info component for module " + gameObject.name);
+		}
+	}
 
-		this.owner = owner;
-		this.view = view;
-
+	protected virtual void OnEnable ()
+	{
 		previousRotation = transform.rotation.eulerAngles.z;
-		previousPosition = transform.position;	
+		previousPosition = transform.position;
 	}
 
 	/**
@@ -59,22 +62,48 @@ public class ModuleController : MonoBehaviour, IController {
 
 	protected virtual void OnDestroy ()
 	{
-		PhotonNetwork.RemoveRPCs (view);
-		PhotonNetwork.RemoveRPCs (owner);
-		PhotonNetwork.UnAllocateViewID (view.viewID);
+		PhotonNetwork.RemoveRPCs (info.view);
+		PhotonNetwork.RemoveRPCs (info.owner);
+		PhotonNetwork.UnAllocateViewID (info.view.viewID);
 	}
 
 	protected virtual void OnPhotonPlayerDisconnected (PhotonPlayer disconnected)
 	{
-		if (disconnected == owner)
+		if (disconnected == info.owner)
 		{
 			ServerObjectManager.RemoveObjectFromGame(gameObject);
 			Destroy (gameObject);
 		}
 	}
 
+	[RPC]
+	protected void DetachModule (PhotonMessageInfo info)
+	{
+		if (info.sender == this.info.owner)
+		{
+			this.info.owner = PhotonNetwork.player;
+			UpdateOwnership ();
+		}
+	}
+
+	[RPC]
+	protected void AttachModule (PhotonMessageInfo info)
+	{
+		if (this.info.owner.isLocal)
+		{
+			this.info.owner = info.sender;
+			UpdateOwnership ();
+		}
+	}
+
+	protected void UpdateOwnership ()
+	{
+		Debug.Log ("Sending ownership change");
+			info.view.RPC ("ChangeOwner", PhotonTargets.Others, this.info.owner);
+	}
+
 	public void Disconnect ()
 	{
-		OnPhotonPlayerDisconnected (owner);
+		OnPhotonPlayerDisconnected (info.owner);
 	}
 }

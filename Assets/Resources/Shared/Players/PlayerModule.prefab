@@ -11,6 +11,7 @@ GameObject:
   - 212: {fileID: 21298240}
   - 61: {fileID: 6163372}
   - 114: {fileID: 11470668}
+  - 114: {fileID: 11402548}
   m_Layer: 0
   m_Name: PlayerModule
   m_TagString: Untagged
@@ -43,6 +44,22 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
+--- !u!114 &11402548
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 104844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1be663c72b06b5f4ca8d69baf240670a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  modifiers: []
+  mass: 4
+  moduleName: Default player module.
+  description: 
+  actionDescription: 
 --- !u!114 &11470668
 MonoBehaviour:
   m_ObjectHideFlags: 1

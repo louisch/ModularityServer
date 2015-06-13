@@ -2,18 +2,22 @@
 using System.Collections;
 
 public class Turret : MonoBehaviour {
+	public ModuleInfo info;
+
+	// turret setup ref
 	public Barrel[] barrels;
+	public float range;
+	public float speedMod;
 	public float turningSpeed;
-	public bool owned = false;
-	public float range = 6;
+	public float idleTurningMod = 4;
 
 	public Quaternion rotateTo;
 
 	void FixedUpdate ()
 	{
-		if (!owned)
+		if (info.owner.isMasterClient)
 		{
-			transform.rotation *= Quaternion.Euler (0,0,turningSpeed/4);
+			transform.rotation *= Quaternion.Euler (0,0,turningSpeed/idleTurningMod);
 		}
 	}
 
@@ -26,7 +30,7 @@ public class Turret : MonoBehaviour {
 	{
 		foreach (Barrel barrel in barrels)
 		{
-			barrel.FIRE();
+			barrel.FIRE(info.owner, range, speedMod);
 		}
 	}
 }

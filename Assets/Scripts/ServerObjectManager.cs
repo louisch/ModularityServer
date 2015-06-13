@@ -126,7 +126,7 @@ public class ServerObjectManager : MonoBehaviour {
 		
 		GameObject module = ObjectConstructor.ConstructModule (prefab, owner, pos, rot);
 		inGameModules.Add (module, prefabPath);
-		int controllerID = module.GetComponent<ModuleController>().view.viewID;
+		int controllerID = module.GetComponent<ModuleController>().info.view.viewID;
 
 		foreach (PhotonPlayer player in playersInGame)
 		{
@@ -143,7 +143,7 @@ public class ServerObjectManager : MonoBehaviour {
 			ModuleController controller = inGame.Key.GetComponent<ModuleController> ();
 			Vector2 pos = inGame.Key.transform.position;
 			float rot = inGame.Key.transform.rotation.eulerAngles.z;
-			view.RPC ("SpawnModule", player, inGame.Value, controller.owner, controller.view.viewID, pos, rot);
+			view.RPC ("SpawnModule", player, inGame.Value, controller.info.owner, controller.info.view.viewID, pos, rot);
 			yield return true;
 		}
 	}
