@@ -38,4 +38,7 @@ MonoBehaviour:
   - ToggleSelection
   - Deselect
   - Select
+  - ChangeOwnership
+  - AttachModule
+  - DetachModule
   DisableAutoOpenWizard: 0

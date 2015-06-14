@@ -114,11 +114,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1be663c72b06b5f4ca8d69baf240670a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  view: {fileID: 0}
   modifiers: []
   mass: 4
+  hp: 10
+  lethalDamage: 0
+  damageFlashPeriod: .200000003
+  armor: 0
   moduleName: Simple Turret
   description: It's a turret.
   actionDescription: It shoots things.
+  selected: 0
+  sprite: {fileID: 0}
 --- !u!114 &11427436
 MonoBehaviour:
   m_ObjectHideFlags: 1
