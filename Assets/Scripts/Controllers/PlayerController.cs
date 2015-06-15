@@ -42,6 +42,11 @@ public class PlayerController : ModuleController, IController {
 		move.Move (ref rb, strafe, thrust, torque);
 	}
 
+	protected override void OnPhotonSerializeView (PhotonStream stream, PhotonMessageInfo info)
+	{
+		base.OnPhotonSerializeView (stream, info);
+	}
+
 	/**
 	* RPC called by clients to update the object's input info.
 	* Only the client that owns the object is allowed to update its input info.
