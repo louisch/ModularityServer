@@ -103,7 +103,10 @@ public class PrefabTracker : MonoBehaviour {
 				Debug.LogWarningFormat ("Could not load asset at path '{0}'. Loading default asset instead.", path);
 				modulePrefab = defaultPrefab;
 			}
-			loadedModules.Add(path,modulePrefab);
+			else
+			{
+				loadedModules.Add(path,modulePrefab);
+			}
 		}
 		else
 		{

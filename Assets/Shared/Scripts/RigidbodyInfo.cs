@@ -17,9 +17,9 @@ public class PilotModuleRigidbodyInfo : RigidbodyInfo
 
 public class RandomModuleRigidbodyInfo : RigidbodyInfo
 {
-	override public float mass {get{return 0.5f;}}
-	override public float drag {get{return 2;}}
-	override public float angularDrag {get{return 4;}}
+	override public float mass {get{return 1;}}
+	override public float drag {get{return 4;}}
+	override public float angularDrag {get{return 10;}}
 }
 
 public class InfoFromRigidbody : RigidbodyInfo

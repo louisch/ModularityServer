@@ -41,4 +41,5 @@ MonoBehaviour:
   - ChangeOwnership
   - AttachModule
   - DetachModule
+  - InitiateTeleport
   DisableAutoOpenWizard: 0
